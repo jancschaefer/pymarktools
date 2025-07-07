@@ -1,0 +1,82 @@
+name: Test
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      PYMARKTOOLS_COLOR: "false"  # Disable colors globally for all CLI operations
+      NO_COLOR: "1"  # Disable color output for tests
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: ["3.13"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+    - name: Install dependencies
+      run: uv sync --all-extras --dev
+    - name: Run type checker
+      run: uv run ty check
+    - name: Run linter
+      run: uv run ruff check src/pymarktools tests
+    - name: Run formatter check
+      run: uv run ruff format --check src/pymarktools tests
+    - name: Run tests
+      run: uv run pytest --cov=src/pymarktools --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+  build:
+    name: Build distribution 📦
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+    - name: Build a binary wheel and a source tarball
+      run: uv build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+    - name: Test install from wheel
+      run: |
+        uv venv test-install
+        source test-install/bin/activate
+        pip install dist/*.whl
+        pymarktools --help
+
+    - name: Run CLI tests
+      run: |
+        chmod +x ./cli-test.sh
+        ./cli-test.sh
