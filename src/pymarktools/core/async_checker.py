@@ -229,14 +229,14 @@ class AsyncChecker(Generic[T]):
         """Check if URL is external (has a scheme)."""
         # Common external URL schemes
         external_schemes = (
-            "ftp://",      # File transfer
-            "ftps://",     # Secure File transfer
-            "http://",     # Web
-            "https://",    # Secure Web
-            "mailto:",     # Email
-            "sftp://",     # Secure shell/file transfer
-            "sms:",        # Telephone/SMS
-            "ssh://",      # Secure shell
-            "tel:",        # Telephone
+            "ftp://",  # File transfer
+            "ftps://",  # Secure File transfer
+            "http://",  # Web
+            "https://",  # Secure Web
+            "mailto:",  # Email
+            "sftp://",  # Secure shell/file transfer
+            "sms:",  # Telephone/SMS
+            "ssh://",  # Secure shell
+            "tel:",  # Telephone
         )
         return url.startswith(external_schemes)
