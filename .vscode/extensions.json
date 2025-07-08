@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "teticio.python-envy",
+        "astral-sh.ty",
+        "charliermarsh.ruff",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "gruntfuggly.todo-tree",
+        "vscode-icons-team.vscode-icons",
+        "tamasfe.even-better-toml"
+    ]
+}

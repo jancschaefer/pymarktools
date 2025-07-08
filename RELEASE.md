@@ -1,5 +1,10 @@
 # Release Process for pymarktools
 
+![](https://badgen.net/github/license/jancschaefer/pymarktools)
+![](https://badgen.net/github/tag/jancschaefer/pymarktools)
+![](https://badgen.net/github/release/jancschaefer/pymarktools)
+![](https://badgen.net/github/checks/jancschaefer/pymarktools/main)
+
 This document outlines the release process for the pymarktools package.
 
 ## Overview
@@ -32,6 +37,12 @@ Production releases to PyPI happen when you create a GitHub release.
 ## Step-by-Step Release Process
 
 ### Step 1: Prepare the Release
+
+
+1. **Update the changelog** in `CHANGELOG.md`:
+
+    - Add a new section for the release version and date
+    - Summarize all user-facing changes, fixes, and improvements
 
 1. **Update the version** in `pyproject.toml`:
 
@@ -202,7 +213,6 @@ Use this checklist for each release:
 - [ ] Automated workflows completed successfully
 - [ ] Package available on PyPI
 - [ ] Installation and basic functionality tested
-- [ ] Release announcement (if applicable)
 
 ---
 

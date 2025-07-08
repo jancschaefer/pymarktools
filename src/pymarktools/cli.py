@@ -4,6 +4,8 @@ import os
 
 import typer
 
+from . import __version__
+
 # Import the command modules
 from .commands import check_app, refactor_app
 from .state import global_state
@@ -13,6 +15,8 @@ app: typer.Typer = typer.Typer(
     name="pymarktools",
     help="A set of markdown utilities for Python",
     no_args_is_help=True,
+    add_completion=True,
+    pretty_exceptions_enable=True,
 )
 
 
@@ -21,9 +25,16 @@ def main(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="Suppress non-essential output"),
     color: bool = typer.Option(True, "--color/--no-color", help="Enable colorized output"),
+    version: bool = typer.Option(
+        None,
+        "--version",
+        callback=lambda value: (typer.echo(__version__) or raise_(typer.Exit())) if value else None,
+        is_eager=True,
+        help="Show the version and exit.",
+        show_default=False,
+    ),
 ) -> None:
     """A set of markdown utilities for Python.
-
     Tools for checking links, images, and refactoring markdown files.
     Supports local file validation, external URL checking, and gitignore integration.
     """
@@ -56,6 +67,12 @@ def main(
         typer.echo("Verbose mode enabled")
     elif quiet:
         typer.echo("Quiet mode enabled", err=True)
+
+
+# Helper to raise exceptions in lambda
+def raise_(ex):
+    """Raise the given exception. Used for control flow in Typer option callbacks."""
+    raise ex
 
 
 # Add the subcommands
