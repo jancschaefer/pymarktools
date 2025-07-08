@@ -109,6 +109,7 @@ echo -e "${BLUE}=== Testing Basic Usage ===${NC}"
 run_test "Basic help" "uv run pymarktools --help"
 run_test "Verbose mode" "uv run pymarktools --verbose check dead-links $temp_dir/sample.md"
 run_test "Quiet mode" "uv run pymarktools --quiet check dead-images $temp_dir/"
+run_test "Version" "uv run pymarktools --version"
 
 # Section: Check for Dead Links and Images
 echo -e "${BLUE}=== Testing Dead Links and Images ===${NC}"

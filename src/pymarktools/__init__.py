@@ -5,7 +5,7 @@ import logging
 from .core.markdown import DeadImageChecker, DeadLinkChecker, ImageInfo, LinkInfo
 from .core.refactor import FileReference, FileReferenceManager
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 __all__ = [
     "DeadLinkChecker",
     "DeadImageChecker",

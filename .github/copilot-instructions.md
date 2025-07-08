@@ -72,7 +72,7 @@ src/pymarktools/
 ### Changelog
 
 - When adding, changing, or removing features, update the `CHANGELOG.md` file with a clear description of the change, the reason for it, and any relevant context.
-- Use the format: `## [version] - [date]` (e.g., `## [0.1.1] - 2025-07-08`).
+- Use the format: `## [version] - [date]` (e.g., `## [0.2.0] - 2025-07-08`).
     - Separate changes into sections: `Added`, `Changed`, `Removed`, `Fixed`, etc.
 - For unreleased changes, use `[unreleased]` as the version and date.
 - Follow the existing changelog structure for consistency.
