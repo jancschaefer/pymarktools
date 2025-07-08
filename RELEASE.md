@@ -164,7 +164,7 @@ If a release needs to be rolled back:
 1. **Fix and re-release**:
 
     - Fix the issue in code
-    - Bump the version (e.g., 0.2.0 → 0.1.2)
+    - Bump the version (e.g., 0.2.0 → 0.2.1) in `pyproject.toml` and `src/pymarktools/__init__.py`
     - Follow the normal release process
 
 ## Troubleshooting

@@ -56,23 +56,6 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
         return links
 
-    def is_external_url(self, url: str) -> bool:
-        """Check if URL is external (has a scheme)."""
-        # Common external URL schemes
-        external_schemes = (
-            "http://",
-            "https://",  # Web
-            "mailto:",  # Email
-            "ftp://",
-            "ftps://",  # File transfer
-            "ssh://",
-            "sftp://",  # Secure shell/file transfer
-            "tel:",
-            "sms:",  # Telephone/SMS
-            "file://",  # File URLs (often external references)
-        )
-        return url.startswith(external_schemes)
-
     def is_email_url(self, url: str) -> bool:
         """Check if URL is an email (mailto:) link."""
         return url.startswith("mailto:")
