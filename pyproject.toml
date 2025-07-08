@@ -1,12 +1,24 @@
 [project]
 name = "pymarktools"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing."
 authors = [
     {name = 'Jan Schäfer', email = 'jan@schae.fr'},
 ]
 readme = "README.md"
 requires-python = ">=3.13"
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+
 dependencies = [
     "gitignore-parser>=0.1.12",
     "httpx>=0.28.1",
@@ -15,6 +27,13 @@ dependencies = [
 scripts = { pymarktools = "pymarktools.cli:app", pymd = "pymarktools.cli:app" }
 license ="MIT"
 license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/jancschaefer/pymarktools"
+Documentation = "https://github.com/jancschaefer/pymarktools/blob/main/README.md"
+Repository = "https://github.com/jancschaefer/pymarktools"
+Issues = "https://github.com/jancschaefer/pymarktools/issues"
+Changelog = "https://github.com/jancschaefer/pymarktools/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -38,6 +57,7 @@ markers = [
     "unit: marks tests as unit tests",
     "integration: marks tests as integration tests",
 ]
+
 
 [build-system]
 requires = ["hatchling"]

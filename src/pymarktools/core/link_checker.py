@@ -56,9 +56,63 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
         return links
 
-    def is_external_url(self, url: str) -> bool:
-        """Check if URL is external (http/https)."""
-        return url.startswith(("http://", "https://"))
+    def is_email_url(self, url: str) -> bool:
+        """Check if URL is an email (mailto:) link."""
+        return url.startswith("mailto:")
+
+    def extract_email_domain(self, email_url: str) -> str:
+        """Extract domain from a mailto: URL."""
+        if not self.is_email_url(email_url):
+            raise ValueError(f"Not an email URL: {email_url}")
+
+        # Remove mailto: prefix
+        email_part = email_url[7:]  # len("mailto:") = 7
+
+        # Extract domain (part after @)
+        if "@" not in email_part:
+            raise ValueError(f"Invalid email format: {email_url}")
+
+        domain = email_part.split("@")[-1]
+
+        # Remove any query parameters or fragments
+        domain = domain.split("?")[0].split("#")[0]
+
+        return domain
+
+    async def check_email_domain_async(self, email_url: str) -> dict[str, Any]:
+        """Check if an email domain exists by validating the domain via HTTP."""
+        result: dict[str, Any] = {
+            "is_valid": False,
+            "status_code": None,
+            "error": None,
+            "redirect_url": None,
+            "is_permanent_redirect": False,
+        }
+
+        try:
+            domain = self.extract_email_domain(email_url)
+
+            # Try to validate domain existence by making a simple HTTP request
+            # This is a basic check - we're just verifying the domain resolves
+            domain_url = f"https://{domain}"
+
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
+                response: httpx.Response = await client.head(domain_url)
+                result["status_code"] = response.status_code
+
+                # For email domains, we consider any response (even 4xx/5xx) as valid
+                # since we're just checking if the domain exists, not if it serves a website
+                result["is_valid"] = True
+
+        except ValueError as e:
+            result["error"] = f"Invalid email format: {e}"
+        except httpx.RequestError as e:
+            # Network errors might indicate domain doesn't exist
+            result["error"] = f"Domain validation failed: {e}"
+        except Exception as e:
+            result["error"] = f"Email domain check failed: {e}"
+
+        return result
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
@@ -112,6 +166,10 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             # Local file reference, don't check with HTTP
             result["is_valid"] = True
             return result
+
+        # Handle email URLs specially
+        if self.is_email_url(url):
+            return await self.check_email_domain_async(url)
 
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:

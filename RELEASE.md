@@ -1,5 +1,10 @@
 # Release Process for pymarktools
 
+![](https://badgen.net/github/license/jancschaefer/pymarktools)
+![](https://badgen.net/github/tag/jancschaefer/pymarktools)
+![](https://badgen.net/github/release/jancschaefer/pymarktools)
+![](https://badgen.net/github/checks/jancschaefer/pymarktools/main)
+
 This document outlines the release process for the pymarktools package.
 
 ## Overview
@@ -33,12 +38,18 @@ Production releases to PyPI happen when you create a GitHub release.
 
 ### Step 1: Prepare the Release
 
+
+1. **Update the changelog** in `CHANGELOG.md`:
+
+    - Add a new section for the release version and date
+    - Summarize all user-facing changes, fixes, and improvements
+
 1. **Update the version** in `pyproject.toml`:
 
     ```toml
     [project]
     name = "pymarktools"
-    version = "0.1.1"  # Update this
+    version = "0.2.0"  # Update this
     ```
 
 1. **Update documentation** if needed (README.md, CHANGELOG.md, etc.)
@@ -47,7 +58,7 @@ Production releases to PyPI happen when you create a GitHub release.
 
     ```bash
     git add pyproject.toml
-    git commit -m "chore: bump version to 0.1.1"
+    git commit -m "chore: bump version to 0.2.0"
     git push origin main
     ```
 
@@ -57,17 +68,17 @@ Production releases to PyPI happen when you create a GitHub release.
 
 ```bash
 # Create a tag (must match the version in pyproject.toml)
-git tag v0.1.1
+git tag v0.2.0
 
 # Push the tag to trigger the release workflow
-git push origin v0.1.1
+git push origin v0.2.0
 ```
 
 ### Step 3: Create a GitHub Release
 
 1. Go to [GitHub Releases](https://github.com/jancschaefer/pymarktools/releases)
 1. Click "Create a new release"
-1. Select the tag you just created (`v0.1.1`)
+1. Select the tag you just created (`v0.2.0`)
 1. Fill in the release title and description
 1. Click "Publish release"
 
@@ -112,7 +123,7 @@ Follow [Semantic Versioning](https://semver.org/):
 Examples:
 
 - `0.1.0` - Initial release
-- `0.1.1` - Patch release (bug fixes)
+- `0.2.0` - Patch release (bug fixes)
 - `0.2.0` - Minor release (new features, backward compatible)
 - `1.0.0` - Major release (breaking changes)
 - `1.0.0a1` - Alpha pre-release
@@ -153,7 +164,7 @@ If a release needs to be rolled back:
 1. **Fix and re-release**:
 
     - Fix the issue in code
-    - Bump the version (e.g., 0.1.1 → 0.1.2)
+    - Bump the version (e.g., 0.2.0 → 0.2.1) in `pyproject.toml` and `src/pymarktools/__init__.py`
     - Follow the normal release process
 
 ## Troubleshooting
@@ -202,7 +213,6 @@ Use this checklist for each release:
 - [ ] Automated workflows completed successfully
 - [ ] Package available on PyPI
 - [ ] Installation and basic functionality tested
-- [ ] Release announcement (if applicable)
 
 ---
 

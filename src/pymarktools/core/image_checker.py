@@ -49,10 +49,6 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
 
         return images
 
-    def is_external_url(self, url: str) -> bool:
-        """Check if URL is external (http/https)."""
-        return url.startswith(("http://", "https://"))
-
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
         result: dict[str, Any] = {
