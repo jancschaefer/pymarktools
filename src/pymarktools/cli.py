@@ -7,7 +7,8 @@ import typer
 from . import __version__
 
 # Import the command modules
-from .commands import check_app, refactor_app
+from .commands import refactor_app
+from .commands.check import check_command
 from .state import global_state
 
 # Create the main application
@@ -76,8 +77,10 @@ def raise_(ex):
 
 
 # Add the subcommands
-app.add_typer(check_app, name="check")
 app.add_typer(refactor_app, name="refactor")
+
+# Add the check command directly to the main app
+app.command("check")(check_command)
 
 
 # Main entry point
