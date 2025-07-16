@@ -1,12 +1,12 @@
 [project]
 name = "pymarktools"
-version = "0.2.0"
+version = "0.3.0"
 description = "A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing."
 authors = [
     {name = 'Jan Schäfer', email = 'jan@schae.fr'},
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -75,8 +75,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
-target-version = 'py39'
-extend-exclude = ['pydantic/v1', 'tests/mypy/']
+target-version = 'py312'
 
 [tool.ruff.lint]
 select = [

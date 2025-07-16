@@ -3,7 +3,6 @@
 from typing import TypedDict
 
 
-# Global state for options that apply to all commands
 class GlobalState(TypedDict):
     """Global state for pymarktools CLI options."""
 
@@ -15,5 +14,5 @@ class GlobalState(TypedDict):
 global_state: GlobalState = GlobalState(
     verbose=False,
     quiet=False,
-    color=True,  # Default to enabled
+    color=True,
 )

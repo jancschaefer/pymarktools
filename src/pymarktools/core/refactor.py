@@ -7,7 +7,6 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from re import Pattern
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class FileReferenceManager:
         self,
         target_file: Path,
         include_pattern: str = "*.md",
-        exclude_pattern: Optional[str] = None,
+        exclude_pattern: str | None = None,
     ) -> list[FileReference]:
         """Find all references to a target file in markdown files.
 
@@ -69,7 +68,7 @@ class FileReferenceManager:
 
         return references
 
-    def _get_search_files(self, include_pattern: str, exclude_pattern: Optional[str]) -> list[Path]:
+    def _get_search_files(self, include_pattern: str, exclude_pattern: str | None) -> list[Path]:
         """Get list of files to search based on include/exclude patterns."""
         files: list[Path] = []
 

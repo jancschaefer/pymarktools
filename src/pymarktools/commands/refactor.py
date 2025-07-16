@@ -1,12 +1,11 @@
 """Refactor commands for pymarktools CLI."""
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 
 from ..core.refactor import FileReference, FileReferenceManager
-from ..state import global_state
+from ..global_state import global_state
 
 # Create a subcommand group for refactor operations
 refactor_app: typer.Typer = typer.Typer(
@@ -20,20 +19,20 @@ refactor_app: typer.Typer = typer.Typer(
 def move_file(
     source: Path = typer.Argument(..., help="Source file path (markdown or image file)"),
     destination: Path = typer.Argument(..., help="Destination file path"),
-    base_dir: Optional[Path] = typer.Option(
+    base_dir: Path | None = typer.Option(
         None,
         "--base-dir",
         "-b",
         help="Base directory to search for references (defaults to current directory)",
     ),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Show what would be done without making changes"),
-    include_pattern: Optional[str] = typer.Option(
+    include_pattern: str | None = typer.Option(
         "*.md",
         "--include",
         "-i",
         help="File pattern to include when searching for references",
     ),
-    exclude_pattern: Optional[str] = typer.Option(
+    exclude_pattern: str | None = typer.Option(
         None,
         "--exclude",
         "-e",

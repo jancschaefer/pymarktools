@@ -7,8 +7,8 @@ import typer
 from . import __version__
 
 # Import the command modules
-from .commands import check_app, refactor_app
-from .state import global_state
+from .commands import check, refactor_app
+from .global_state import global_state
 
 # Create the main application
 app: typer.Typer = typer.Typer(
@@ -75,8 +75,8 @@ def raise_(ex):
     raise ex
 
 
-# Add the subcommands
-app.add_typer(check_app, name="check")
+# Register commands
+app.command("check")(check)
 app.add_typer(refactor_app, name="refactor")
 
 

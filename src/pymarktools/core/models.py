@@ -1,7 +1,6 @@
 """Data models for markdown processing."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -11,14 +10,14 @@ class LinkInfo:
     text: str
     url: str
     line_number: int
-    is_valid: Optional[bool] = None
-    status_code: Optional[int] = None
-    error: Optional[str] = None
-    redirect_url: Optional[str] = None
-    is_permanent_redirect: Optional[bool] = None
+    is_valid: bool | None = None
+    status_code: int | None = None
+    error: str | None = None
+    redirect_url: str | None = None
+    is_permanent_redirect: bool | None = None
     updated: bool = False
-    is_local: Optional[bool] = None
-    local_path: Optional[str] = None
+    is_local: bool | None = None
+    local_path: str | None = None
 
 
 @dataclass
@@ -28,11 +27,11 @@ class ImageInfo:
     alt_text: str
     url: str
     line_number: int
-    is_valid: Optional[bool] = None
-    status_code: Optional[int] = None
-    error: Optional[str] = None
-    redirect_url: Optional[str] = None
-    is_permanent_redirect: Optional[bool] = None
+    is_valid: bool | None = None
+    status_code: int | None = None
+    error: str | None = None
+    redirect_url: str | None = None
+    is_permanent_redirect: bool | None = None
     updated: bool = False
-    is_local: Optional[bool] = None
-    local_path: Optional[str] = None
+    is_local: bool | None = None
+    local_path: str | None = None

@@ -2,8 +2,9 @@
 
 import logging
 import re
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional, cast
+from typing import Any, cast
 
 import httpx
 
@@ -24,7 +25,7 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
         follow_gitignore: bool = True,
         check_local: bool = True,
         parallel: bool = True,
-        workers: Optional[int] = None,
+        workers: int | None = None,
     ):
         super().__init__(
             timeout=timeout,
@@ -220,8 +221,8 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
         self,
         directory: Path,
         include_pattern: str = "*.md",
-        exclude_pattern: Optional[str] = None,
-        progress_callback: Optional[Callable[[Path, list[ImageInfo]], None]] = None,
+        exclude_pattern: str | None = None,
+        progress_callback: Callable[[Path, list[ImageInfo]], None] | None = None,
     ) -> dict[Path, list[ImageInfo]]:
         """Check all markdown files in a directory recursively using async processing.
 
@@ -247,7 +248,7 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
         self,
         directory: Path,
         include_pattern: str = "*.md",
-        exclude_pattern: Optional[str] = None,
+        exclude_pattern: str | None = None,
     ) -> dict[Path, list[ImageInfo]]:
         """Check all markdown files in a directory recursively (synchronous wrapper).
 

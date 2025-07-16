@@ -4,8 +4,9 @@ import asyncio
 import fnmatch
 import logging
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Generic, Optional, TypeVar
+from typing import Any, TypeVar
 
 from .gitignore import get_gitignore_matcher, is_path_ignored
 
@@ -14,18 +15,26 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")  # Type for the result objects (LinkInfo, ImageInfo, etc.)
 
 
-class AsyncChecker(Generic[T]):
+class AsyncChecker[T]:
     """Base class for async checkers with utilities for concurrent processing."""
 
+    timeout: int
+    check_external: bool
+    fix_redirects: bool
+    follow_gitignore: bool
+    check_local: bool
+    parallel: bool
+    workers: int | None
+
     def __init__(
-        self,
+        self: "AsyncChecker",
         timeout: int = 30,
         check_external: bool = True,
         fix_redirects: bool = False,
         follow_gitignore: bool = True,
         check_local: bool = True,
         parallel: bool = True,
-        workers: Optional[int] = None,
+        workers: int | None = None,
     ):
         self.timeout = timeout
         self.check_external = check_external
@@ -36,21 +45,21 @@ class AsyncChecker(Generic[T]):
         self.workers = workers if workers is not None else os.cpu_count()
 
     async def discover_files_async(
-        self,
+        self: "AsyncChecker",
         directory: Path,
         include_pattern: str = "*.md",
-        exclude_pattern: Optional[str] = None,
+        exclude_pattern: str | None = None,
     ) -> list[Path]:
         """Discover files asynchronously with first-level directory listing and parallel expansion."""
         if not directory.is_dir():
             return [directory] if directory.is_file() else []
 
         # Get gitignore matcher if needed
-        gitignore_matcher: Optional[Callable[[str], bool]] = None
+        gitignore_matcher: Callable[[str], bool] | None = None
         if self.follow_gitignore:
             gitignore_matcher = get_gitignore_matcher(directory)
 
-        async def check_and_add_file(file_path: Path) -> Optional[Path]:
+        async def check_and_add_file(file_path: Path) -> Path | None:
             """Check if a file should be included."""
             if not file_path.is_file():
                 return None
@@ -87,10 +96,10 @@ class AsyncChecker(Generic[T]):
                         subdirs.append(item)
 
                 # Process files in current directory
-                file_tasks: list[asyncio.Task[Optional[Path]]] = [
+                file_tasks: list[asyncio.Task[Path | None]] = [
                     asyncio.create_task(check_and_add_file(file_path)) for file_path in files
                 ]
-                file_results: list[Optional[Path] | BaseException] = await asyncio.gather(
+                file_results: list[Path | None | BaseException] = await asyncio.gather(
                     *file_tasks, return_exceptions=True
                 )
 
@@ -114,7 +123,7 @@ class AsyncChecker(Generic[T]):
         # Start the async file discovery
         return await process_directory_level(directory)
 
-    def run_async_with_fallback(self, coro_func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    def run_async_with_fallback(self: "AsyncChecker", coro_func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Run an async function with fallback to thread pool if already in event loop."""
         try:
             asyncio.get_running_loop()
@@ -130,10 +139,10 @@ class AsyncChecker(Generic[T]):
             return asyncio.run(coro_func(*args, **kwargs))
 
     async def process_files_async(
-        self,
+        self: "AsyncChecker",
         files: list[Path],
         file_processor: Callable[[Path], Any],
-        progress_callback: Optional[Callable[[Path, Any], None]] = None,
+        progress_callback: Callable[[Path, Any], None] | None = None,
     ) -> dict[Path, Any]:
         """Process files asynchronously with progress callbacks."""
         results: dict[Path, Any] = {}
@@ -175,7 +184,7 @@ class AsyncChecker(Generic[T]):
         return results
 
     async def process_items_async(
-        self,
+        self: "AsyncChecker",
         items: list[str],
         item_processor: Callable[[str], Any],
     ) -> dict[str, Any]:
@@ -225,7 +234,7 @@ class AsyncChecker(Generic[T]):
 
         return results
 
-    def is_external_url(self, url: str) -> bool:
+    def is_external_url(self: "AsyncChecker", url: str) -> bool:
         """Check if URL is external (has a scheme)."""
         # Common external URL schemes
         external_schemes = (

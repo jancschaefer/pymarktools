@@ -4,6 +4,7 @@
 
 # cli-test.sh - Test script for pymarktools CLI functionality
 # This script tests all scenarios mentioned in the Usage section of README.md
+# Updated for API v0.3.0 - unified check command with --check-dead-links/--check-dead-images options
 
 # Define colors for output
 GREEN='\033[0;32m'
@@ -107,74 +108,89 @@ echo ""
 echo -e "${BLUE}=== Testing Basic Usage ===${NC}"
 
 run_test "Basic help" "uv run pymarktools --help"
-run_test "Verbose mode" "uv run pymarktools --verbose check dead-links $temp_dir/sample.md"
-run_test "Quiet mode" "uv run pymarktools --quiet check dead-images $temp_dir/"
+run_test "Verbose mode" "uv run pymarktools --verbose check $temp_dir/sample.md"
+run_test "Quiet mode" "uv run pymarktools --quiet check $temp_dir/"
 run_test "Version" "uv run pymarktools --version"
 
 # Section: Check for Dead Links and Images
 echo -e "${BLUE}=== Testing Dead Links and Images ===${NC}"
 
-run_test "Basic link checking" "uv run pymarktools check dead-links $temp_dir/sample.md"
-run_test "Link check with custom timeout and external validation" "uv run pymarktools check dead-links $temp_dir/ --timeout 60 --check-external"
-run_test "Link check only local files" "uv run pymarktools check dead-links $temp_dir/ --no-check-external"
+run_test "Basic link checking" "uv run pymarktools check $temp_dir/sample.md"
+run_test "Link check with custom timeout and external validation" "uv run pymarktools check $temp_dir/ --timeout 60 --check-external"
+run_test "Link check only local files" "uv run pymarktools check $temp_dir/ --no-check-external"
 
-run_test "Basic image checking" "uv run pymarktools check dead-images $temp_dir/sample.md"
-run_test "Image check with pattern filtering" "uv run pymarktools check dead-images $temp_dir/ --include \"*.md\" --exclude \"draft_*\""
+run_test "Basic image checking" "uv run pymarktools check $temp_dir/sample.md"
+run_test "Image check with pattern filtering" "uv run pymarktools check $temp_dir/ --include \"*.md\" --exclude \"draft_*\""
+
+run_test "Check only links (disable images)" "uv run pymarktools check $temp_dir/sample.md --no-check-dead-images"
+run_test "Check only images (disable links)" "uv run pymarktools check $temp_dir/sample.md --no-check-dead-links"
+
+# Section: Exit Behavior Testing
+echo -e "${BLUE}=== Testing Exit Behavior ===${NC}"
+
+run_test "Default fail behavior" "uv run pymarktools check $temp_dir/sample.md --no-check-external"
+run_test "Disable fail on errors" "uv run pymarktools check $temp_dir/sample.md --no-fail --no-check-external"
+run_test "Explicit fail on errors" "uv run pymarktools check $temp_dir/sample.md --fail --no-check-external"
+
+# Section: Both Checks Disabled Error
+echo -e "${BLUE}=== Testing Error Conditions ===${NC}"
+
+run_test "Both checks disabled error" "uv run pymarktools check $temp_dir/sample.md --no-check-dead-links --no-check-dead-images"
 
 # Section: Flexible Option Placement
 echo -e "${BLUE}=== Testing Flexible Option Placement ===${NC}"
 
-run_test "Options at callback level" "uv run pymarktools check --timeout 30 --no-check-external dead-links $temp_dir/sample.md"
-run_test "Options at command level" "uv run pymarktools check dead-links $temp_dir/sample.md --timeout 10 --check-external"
-run_test "Mixed approach" "uv run pymarktools check --include \"*.md\" dead-links --timeout 60 $temp_dir/"
+run_test "Options at callback level" "uv run pymarktools check --timeout 30 --no-check-external $temp_dir/sample.md"
+run_test "Options at command level" "uv run pymarktools check $temp_dir/sample.md --timeout 10 --check-external"
+run_test "Mixed approach" "uv run pymarktools check --include \"*.md\" --timeout 60 $temp_dir/"
 
 # Section: Local File Validation
 echo -e "${BLUE}=== Testing Local File Validation ===${NC}"
 
-run_test "Check both local and external" "uv run pymarktools check dead-links $temp_dir/"
-run_test "Skip local file checking" "uv run pymarktools check dead-links $temp_dir/ --no-check-local"
-run_test "Check only local files" "uv run pymarktools check dead-links $temp_dir/ --no-check-external"
+run_test "Check both local and external" "uv run pymarktools check $temp_dir/"
+run_test "Skip local file checking" "uv run pymarktools check $temp_dir/ --no-check-local"
+run_test "Check only local files" "uv run pymarktools check $temp_dir/ --no-check-external"
 
 # Section: External URL Checking and Redirect Fixing
 echo -e "${BLUE}=== Testing External URL Checking and Redirect Fixing ===${NC}"
 
-run_test "Basic external URL checking" "uv run pymarktools check dead-links $temp_dir/sample.md"
-run_test "Disable external URL checking" "uv run pymarktools check dead-links $temp_dir/sample.md --no-check-external"
-run_test "Fix permanent redirects" "uv run pymarktools check dead-links $temp_dir/sample.md --fix-redirects"
-run_test "Custom timeout" "uv run pymarktools check dead-links $temp_dir/sample.md --timeout 60"
+run_test "Basic external URL checking" "uv run pymarktools check $temp_dir/sample.md"
+run_test "Disable external URL checking" "uv run pymarktools check $temp_dir/sample.md --no-check-external"
+run_test "Fix permanent redirects" "uv run pymarktools check $temp_dir/sample.md --fix-redirects"
+run_test "Custom timeout" "uv run pymarktools check $temp_dir/sample.md --timeout 60"
 
 # Section: Pattern Filtering
 echo -e "${BLUE}=== Testing Pattern Filtering ===${NC}"
 
-run_test "Include only markdown files" "uv run pymarktools check dead-links $temp_dir/ --include \"*.md\""
-run_test "Exclude draft files" "uv run pymarktools check dead-links $temp_dir/ --exclude \"draft_*\""
-run_test "Combine include and exclude patterns" "uv run pymarktools check dead-links $temp_dir/ --include \"*.md\" --exclude \"draft_*\""
+run_test "Include only markdown files" "uv run pymarktools check $temp_dir/ --include \"*.md\""
+run_test "Exclude draft files" "uv run pymarktools check $temp_dir/ --exclude \"draft_*\""
+run_test "Combine include and exclude patterns" "uv run pymarktools check $temp_dir/ --include \"*.md\" --exclude \"draft_*\""
 
 # Section: Gitignore Support
 echo -e "${BLUE}=== Testing Gitignore Support ===${NC}"
 
-run_test "Respect gitignore" "uv run pymarktools check dead-links $temp_dir/"
-run_test "Disable gitignore" "uv run pymarktools check dead-links $temp_dir/ --no-follow-gitignore"
+run_test "Respect gitignore" "uv run pymarktools check $temp_dir/"
+run_test "Disable gitignore" "uv run pymarktools check $temp_dir/ --no-follow-gitignore"
 
 # Section: Async Processing
 echo -e "${BLUE}=== Testing Async Processing ===${NC}"
 
-run_test "Use async with default worker count" "uv run pymarktools check dead-links $temp_dir/ --parallel"
-run_test "Custom worker count" "uv run pymarktools check dead-links $temp_dir/ --workers 2"
-run_test "Disable async processing" "uv run pymarktools check dead-links $temp_dir/ --no-parallel"
+run_test "Use async with default worker count" "uv run pymarktools check $temp_dir/ --parallel"
+run_test "Custom worker count" "uv run pymarktools check $temp_dir/ --workers 2"
+run_test "Disable async processing" "uv run pymarktools check $temp_dir/ --no-parallel"
 
 # Section: Color Output
 echo -e "${BLUE}=== Testing Color Output ===${NC}"
 
-run_test "Enable color output" "uv run pymarktools --color check dead-links $temp_dir/"
-run_test "Disable color output" "uv run pymarktools --no-color check dead-links $temp_dir/"
+run_test "Enable color output" "uv run pymarktools --color check $temp_dir/"
+run_test "Disable color output" "uv run pymarktools --no-color check $temp_dir/"
 
 # Section: Verbosity Levels
 echo -e "${BLUE}=== Testing Verbosity Levels ===${NC}"
 
-run_test "Quiet mode" "uv run pymarktools --quiet check dead-links $temp_dir/"
-run_test "Default mode" "uv run pymarktools check dead-links $temp_dir/"
-run_test "Verbose mode" "uv run pymarktools --verbose check dead-links $temp_dir/"
+run_test "Quiet mode" "uv run pymarktools --quiet check $temp_dir/"
+run_test "Default mode" "uv run pymarktools check $temp_dir/"
+run_test "Verbose mode" "uv run pymarktools --verbose check $temp_dir/"
 
 # Section: File Refactoring
 echo -e "${BLUE}=== Testing File Refactoring ===${NC}"
@@ -189,19 +205,19 @@ run_test "Move with dry run" "cp $temp_dir/sample.md $temp_dir/to_move3.md && uv
 # Section: CI/CD Integration 
 echo -e "${BLUE}=== Testing CI/CD Integration ===${NC}"
 
-run_test "Minimal CI check" "uv run pymarktools --quiet check dead-links $temp_dir/ --no-check-external"
-run_test "Full CI validation" "uv run pymarktools check dead-links $temp_dir/ --include \"*.md\" --timeout 10 || true"
+run_test "Minimal CI check" "uv run pymarktools --quiet check $temp_dir/ --no-check-external"
+run_test "Full CI validation" "uv run pymarktools check $temp_dir/ --include \"*.md\" --timeout 10 || true"
 
 # Section: Common Examples
 echo -e "${BLUE}=== Testing Common Examples ===${NC}"
 
-run_test "Quick validation - current directory" "uv run pymarktools check dead-links $temp_dir/"
-run_test "Quick validation - specific file" "uv run pymarktools --verbose check dead-links $temp_dir/sample.md"
-run_test "Quick validation - local files only" "uv run pymarktools check dead-links $temp_dir/ --no-check-external"
+run_test "Quick validation - current directory" "uv run pymarktools check $temp_dir/"
+run_test "Quick validation - specific file" "uv run pymarktools --verbose check $temp_dir/sample.md"
+run_test "Quick validation - local files only" "uv run pymarktools check $temp_dir/ --no-check-external"
 
-run_test "Comprehensive checking - full validation" "uv run pymarktools check dead-links $temp_dir/ --fix-redirects --timeout 60"
-run_test "Comprehensive checking - custom patterns" "uv run pymarktools check dead-images $temp_dir/ --include \"*.md\" --follow-gitignore"
-run_test "Comprehensive checking - batch processing" "uv run pymarktools check --timeout 30 dead-links $temp_dir/ --check-external --fix-redirects"
+run_test "Comprehensive checking - full validation" "uv run pymarktools check $temp_dir/ --fix-redirects --timeout 60"
+run_test "Comprehensive checking - custom patterns" "uv run pymarktools check $temp_dir/ --include \"*.md\" --follow-gitignore"
+run_test "Comprehensive checking - batch processing" "uv run pymarktools check --timeout 30 $temp_dir/ --check-external --fix-redirects"
 
 # Clean up the temporary directory
 rm -rf "$temp_dir"

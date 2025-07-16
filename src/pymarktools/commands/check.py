@@ -3,34 +3,17 @@
 import asyncio
 import os
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import typer
 
+from ..check_options import CheckOptions, check_options
 from ..core.image_checker import DeadImageChecker
 from ..core.link_checker import DeadLinkChecker
-from ..state import global_state
-
-# Create a subcommand group for check operations
-check_app: typer.Typer = typer.Typer(name="check", help="Check markdown files for various issues", no_args_is_help=True)
-
-# Global state for common options
-check_state: dict[str, Any] = {
-    "timeout": 30,
-    "output": None,
-    "check_external": True,
-    "check_local": True,
-    "fix_redirects": False,
-    "follow_gitignore": True,
-    "include_pattern": "*.md",
-    "exclude_pattern": None,
-    "parallel": True,
-    "workers": None,  # Will default to cpu_count() in checkers
-    "fail": True,
-}
+from ..global_state import global_state
 
 
-def echo_if_not_quiet(message: str, err: bool = False, color: Optional[str] = None) -> None:
+def echo_if_not_quiet(message: str, err: bool = False, color: str | None = None) -> None:
     """Echo message only if not in quiet mode."""
     if not global_state.get("quiet", False):
         if global_state.get("color", True) and color:
@@ -39,7 +22,7 @@ def echo_if_not_quiet(message: str, err: bool = False, color: Optional[str] = No
             typer.echo(message, err=err)
 
 
-def echo_if_verbose(message: str, err: bool = False, color: Optional[str] = None) -> None:
+def echo_if_verbose(message: str, err: bool = False, color: str | None = None) -> None:
     """Echo message only if in verbose mode."""
     if global_state.get("verbose", False):
         if global_state.get("color", True) and color:
@@ -80,62 +63,71 @@ def echo_info(message: str, err: bool = False) -> None:
         typer.echo(message, err=err)
 
 
-@check_app.callback()
-def check_callback(
-    timeout: int = typer.Option(30, "--timeout", "-t", help="Request timeout in seconds"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for the report"),
+def check(
+    path: Path | None = typer.Argument(None, help="Path to markdown file or directory (defaults to current directory)"),
+    timeout: int = typer.Option(check_options["timeout"], "--timeout", "-t", help="Request timeout in seconds"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file for the report"),
     check_external: bool = typer.Option(
-        True,
+        check_options["check_external"],
         "--check-external/--no-check-external",
         help="Whether to check external links/images with HTTP requests",
     ),
     check_local: bool = typer.Option(
-        True,
+        check_options["check_local"],
         "--check-local/--no-check-local",
         help="Whether to check if local file links/images exist",
     ),
     fix_redirects: bool = typer.Option(
-        False,
+        check_options["fix_redirects"],
         "--fix-redirects",
         help="Update links/images with permanent redirects in the source files",
     ),
     follow_gitignore: bool = typer.Option(
-        True,
+        check_options["follow_gitignore"],
         "--follow-gitignore/--no-follow-gitignore",
         help="Respect .gitignore patterns when scanning directories",
     ),
     include_pattern: str = typer.Option(
-        "*.md",
+        check_options["include_pattern"],
         "--include",
         "-i",
         help="File pattern to include when searching for references",
     ),
-    exclude_pattern: Optional[str] = typer.Option(
-        None,
+    exclude_pattern: str | None = typer.Option(
+        check_options["exclude_pattern"],
         "--exclude",
         "-e",
         help="File pattern to exclude when searching for references",
     ),
     parallel: bool = typer.Option(
-        True,
+        check_options["parallel"],
         "--parallel/--no-parallel",
         help="Enable parallel processing for external URL checks",
     ),
     fail: bool = typer.Option(
-        True,
+        check_options["fail"],
         "--fail/--no-fail",
         help="Exit with status 1 if invalid links/images are found",
     ),
-    workers: Optional[int] = typer.Option(
-        None,
+    workers: int | None = typer.Option(
+        check_options["workers"],
         "--workers",
         "-w",
         help="Number of worker threads for parallel processing (defaults to CPU count)",
     ),
+    check_dead_links: bool = typer.Option(
+        check_options["check_dead_links"], "--check-dead-links/--no-check-dead-links", help="Validate links"
+    ),
+    check_dead_images: bool = typer.Option(
+        check_options["check_dead_images"], "--check-dead-images/--no-check-dead-images", help="Validate images"
+    ),
 ) -> None:
-    """Check markdown files for various issues like dead links and images."""
-    # Update global state with callback parameters
-    check_state.update(
+    """Check markdown files for dead links and images."""
+    if path is None:
+        path = Path.cwd()
+
+    local_options: CheckOptions = check_options.copy()
+    local_options.update(
         {
             "timeout": timeout,
             "output": output,
@@ -148,41 +140,109 @@ def check_callback(
             "parallel": parallel,
             "fail": fail,
             "workers": workers,
+            "check_dead_links": check_dead_links,
+            "check_dead_images": check_dead_images,
         }
     )
 
+    if not local_options["check_dead_links"] and not local_options["check_dead_images"]:
+        echo_error("Both checks disabled; nothing to do")
+        raise typer.Exit(1)
 
-def print_common_info(path: Path) -> None:
+    # Use local_options for this invocation without mutating the global defaults
+
+    overall_valid = True
+
+    if local_options["check_dead_links"]:
+        echo_info("Checking for dead links...")
+        print_common_info(path, local_options)
+
+        link_checker = DeadLinkChecker(
+            timeout=local_options["timeout"],
+            check_external=local_options["check_external"],
+            check_local=local_options["check_local"],
+            fix_redirects=local_options["fix_redirects"],
+            follow_gitignore=local_options["follow_gitignore"],
+            parallel=local_options["parallel"],
+            workers=local_options["workers"],
+        )
+
+        try:
+            all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", path, local_options))
+        except RuntimeError:
+            all_valid = process_path_and_check(link_checker, "links", path, local_options)
+
+        overall_valid = overall_valid and all_valid
+        if all_valid:
+            echo_success("All links are valid")
+        else:
+            echo_error("Some links are invalid or broken")
+
+    if local_options["check_dead_images"]:
+        echo_info("Checking for dead images...")
+        print_common_info(path, local_options)
+
+        image_checker = DeadImageChecker(
+            timeout=local_options["timeout"],
+            check_external=local_options["check_external"],
+            check_local=local_options["check_local"],
+            fix_redirects=local_options["fix_redirects"],
+            follow_gitignore=local_options["follow_gitignore"],
+            parallel=local_options["parallel"],
+            workers=local_options["workers"],
+        )
+
+        try:
+            all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", path, local_options))
+        except RuntimeError:
+            all_valid = process_path_and_check(image_checker, "images", path, local_options)
+
+        overall_valid = overall_valid and all_valid
+        if all_valid:
+            echo_success("All images are valid")
+        else:
+            echo_error("Some images are invalid or broken")
+
+    if not overall_valid and local_options["fail"]:
+        raise typer.Exit(1)
+
+
+def print_common_info(path: Path, options: CheckOptions) -> None:
     """Print common information about the check operation."""
     echo_if_verbose(f"Checking in: {path}")
-    echo_if_verbose(f"Using timeout: {check_state['timeout']}s")
-    echo_if_verbose(f"Checking external: {check_state['check_external']}")
-    echo_if_verbose(f"Checking local files: {check_state['check_local']}")
-    echo_if_verbose(f"Fixing redirects: {check_state['fix_redirects']}")
-    echo_if_verbose(f"Following gitignore: {check_state['follow_gitignore']}")
-    echo_if_verbose(f"Include pattern: {check_state['include_pattern']}")
-    if check_state["exclude_pattern"]:
-        echo_if_verbose(f"Exclude pattern: {check_state['exclude_pattern']}")
-    echo_if_verbose(f"Parallel processing: {check_state['parallel']}")
-    if check_state["workers"]:
-        echo_if_verbose(f"Worker threads: {check_state['workers']}")
+    echo_if_verbose(f"Using timeout: {options['timeout']}s")
+    echo_if_verbose(f"Checking external: {options['check_external']}")
+    echo_if_verbose(f"Checking local files: {options['check_local']}")
+    echo_if_verbose(f"Fixing redirects: {options['fix_redirects']}")
+    echo_if_verbose(f"Following gitignore: {options['follow_gitignore']}")
+    echo_if_verbose(f"Include pattern: {options['include_pattern']}")
+    if options["exclude_pattern"]:
+        echo_if_verbose(f"Exclude pattern: {options['exclude_pattern']}")
+    echo_if_verbose(f"Parallel processing: {options['parallel']}")
+    if options["workers"]:
+        echo_if_verbose(f"Worker threads: {options['workers']}")
     else:
         echo_if_verbose(f"Worker threads: {os.cpu_count()} (auto-detected)")
-    if check_state["output"]:
-        echo_if_verbose(f"Report will be saved to: {check_state['output']}")
-    echo_if_verbose(f"Fail on invalid items: {check_state['fail']}")
+    if options["output"]:
+        echo_if_verbose(f"Report will be saved to: {options['output']}")
+    echo_if_verbose(f"Fail on invalid items: {options['fail']}")
 
 
-def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], item_type: str, path: Path) -> bool:
+def process_path_and_check(
+    checker: DeadLinkChecker | DeadImageChecker,
+    item_type: str,
+    path: Path,
+    options: CheckOptions,
+) -> bool:
     """Process the path and run the checker, displaying results.
 
     Returns:
         True if all items are valid, False if any invalid items are found.
     """
     # For directory processing with many files, use async for better performance and progress reporting
-    if path.is_dir() and check_state.get("parallel", True):
+    if path.is_dir() and options.get("parallel", True):
         try:
-            return asyncio.run(process_path_and_check_async(checker, item_type, path))
+            return asyncio.run(process_path_and_check_async(checker, item_type, path, options))
         except RuntimeError:
             # Already in an event loop, fall back to sync processing
             pass
@@ -201,8 +261,8 @@ def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], it
         elif path.is_dir():
             results = checker.check_directory(
                 path,
-                include_pattern=check_state["include_pattern"],
-                exclude_pattern=check_state["exclude_pattern"],
+                include_pattern=options["include_pattern"],
+                exclude_pattern=options["exclude_pattern"],
             )
             total_items: int = sum(len(items) for items in results.values())
             echo_if_not_quiet(f"Found {total_items} {item_type} across {len(results)} files")
@@ -224,7 +284,10 @@ def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], it
 
 
 async def process_path_and_check_async(
-    checker: Union[DeadLinkChecker, DeadImageChecker], item_type: str, path: Path
+    checker: DeadLinkChecker | DeadImageChecker,
+    item_type: str,
+    path: Path,
+    options: CheckOptions,
 ) -> bool:
     """Process the path and run the checker asynchronously with progress reporting.
 
@@ -261,8 +324,8 @@ async def process_path_and_check_async(
             # Run async directory check with progress reporting
             results = await checker.check_directory_async(
                 path,
-                include_pattern=check_state["include_pattern"],
-                exclude_pattern=check_state["exclude_pattern"],
+                include_pattern=options["include_pattern"],
+                exclude_pattern=options["exclude_pattern"],
                 progress_callback=progress_callback if global_state.get("verbose", False) else None,
             )
 
@@ -339,243 +402,3 @@ def display_item_result(item: Any, item_type: str) -> None:
     # Display resolved path in blue (verbose mode only)
     if item.local_path and global_state.get("verbose", False):
         echo_info(f"    Resolved path: {item.local_path}")
-
-
-@check_app.command("dead-links")
-def check_dead_links(
-    path: Optional[Path] = typer.Argument(
-        None, help="Path to markdown file or directory (defaults to current directory)"
-    ),
-    timeout: Optional[int] = typer.Option(None, "--timeout", "-t", help="Request timeout in seconds"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for the report"),
-    check_external: Optional[bool] = typer.Option(
-        None,
-        "--check-external/--no-check-external",
-        help="Whether to check external links with HTTP requests",
-    ),
-    check_local: Optional[bool] = typer.Option(
-        None,
-        "--check-local/--no-check-local",
-        help="Whether to check if local file links exist",
-    ),
-    fix_redirects: Optional[bool] = typer.Option(
-        None,
-        "--fix-redirects",
-        help="Update links with permanent redirects in the source files",
-    ),
-    follow_gitignore: Optional[bool] = typer.Option(
-        None,
-        "--follow-gitignore/--no-follow-gitignore",
-        help="Respect .gitignore patterns when scanning directories",
-    ),
-    include_pattern: Optional[str] = typer.Option(
-        None,
-        "--include",
-        "-i",
-        help="File pattern to include when searching for references",
-    ),
-    exclude_pattern: Optional[str] = typer.Option(
-        None,
-        "--exclude",
-        "-e",
-        help="File pattern to exclude when searching for references",
-    ),
-    parallel: Optional[bool] = typer.Option(
-        None,
-        "--parallel/--no-parallel",
-        help="Enable parallel processing for external URL checks",
-    ),
-    fail: Optional[bool] = typer.Option(
-        None,
-        "--fail/--no-fail",
-        help="Exit with status 1 if invalid links are found",
-    ),
-    workers: Optional[int] = typer.Option(
-        None,
-        "--workers",
-        "-w",
-        help="Number of worker threads for parallel processing (defaults to CPU count)",
-    ),
-) -> None:
-    """Check for dead links in markdown files."""
-    # Use current directory as default if no path specified
-    if path is None:
-        path = Path.cwd()
-
-    # Override check_state with command-specific options if provided
-    local_state: dict[str, Any] = check_state.copy()
-    if timeout is not None:
-        local_state["timeout"] = timeout
-    if output is not None:
-        local_state["output"] = output
-    if check_external is not None:
-        local_state["check_external"] = check_external
-    if check_local is not None:
-        local_state["check_local"] = check_local
-    if fix_redirects is not None:
-        local_state["fix_redirects"] = fix_redirects
-    if follow_gitignore is not None:
-        local_state["follow_gitignore"] = follow_gitignore
-    if include_pattern is not None:
-        local_state["include_pattern"] = include_pattern
-    if exclude_pattern is not None:
-        local_state["exclude_pattern"] = exclude_pattern
-    if parallel is not None:
-        local_state["parallel"] = parallel
-    if fail is not None:
-        local_state["fail"] = fail
-    if workers is not None:
-        local_state["workers"] = workers
-
-    # Update global check_state for this command execution
-    check_state.update(local_state)
-
-    echo_info("Checking for dead links...")
-    print_common_info(path)
-
-    checker: DeadLinkChecker = DeadLinkChecker(
-        timeout=check_state["timeout"],
-        check_external=check_state["check_external"],
-        check_local=check_state["check_local"],
-        fix_redirects=check_state["fix_redirects"],
-        follow_gitignore=check_state["follow_gitignore"],
-        parallel=check_state["parallel"],
-        workers=check_state["workers"],
-    )
-
-    # Use async processing for better performance
-    all_valid: bool
-    try:
-        all_valid = asyncio.run(process_path_and_check_async(checker, "links", path))
-    except RuntimeError:
-        # Fall back to sync if already in event loop
-        all_valid = process_path_and_check(checker, "links", path)
-
-    if not all_valid:
-        if check_state["fail"]:
-            echo_error("Some links are invalid or broken")
-            raise typer.Exit(1)
-        else:
-            echo_info("Some links are invalid or broken; continuing due to --no-fail")
-    else:
-        echo_success("All links are valid")
-
-
-@check_app.command("dead-images")
-def check_dead_images(
-    path: Optional[Path] = typer.Argument(
-        None, help="Path to markdown file or directory (defaults to current directory)"
-    ),
-    timeout: Optional[int] = typer.Option(None, "--timeout", "-t", help="Request timeout in seconds"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for the report"),
-    check_external: Optional[bool] = typer.Option(
-        None,
-        "--check-external/--no-check-external",
-        help="Whether to check external images with HTTP requests",
-    ),
-    check_local: Optional[bool] = typer.Option(
-        None,
-        "--check-local/--no-check-local",
-        help="Whether to check if local file images exist",
-    ),
-    fix_redirects: Optional[bool] = typer.Option(
-        None,
-        "--fix-redirects",
-        help="Update images with permanent redirects in the source files",
-    ),
-    follow_gitignore: Optional[bool] = typer.Option(
-        None,
-        "--follow-gitignore/--no-follow-gitignore",
-        help="Respect .gitignore patterns when scanning directories",
-    ),
-    include_pattern: Optional[str] = typer.Option(
-        None,
-        "--include",
-        "-i",
-        help="File pattern to include when searching for references",
-    ),
-    exclude_pattern: Optional[str] = typer.Option(
-        None,
-        "--exclude",
-        "-e",
-        help="File pattern to exclude when searching for references",
-    ),
-    parallel: Optional[bool] = typer.Option(
-        None,
-        "--parallel/--no-parallel",
-        help="Enable parallel processing for external URL checks",
-    ),
-    fail: Optional[bool] = typer.Option(
-        None,
-        "--fail/--no-fail",
-        help="Exit with status 1 if invalid images are found",
-    ),
-    workers: Optional[int] = typer.Option(
-        None,
-        "--workers",
-        "-w",
-        help="Number of worker threads for parallel processing (defaults to CPU count)",
-    ),
-) -> None:
-    """Check for dead images in markdown files."""
-    # Use current directory as default if no path specified
-    if path is None:
-        path = Path.cwd()
-
-    # Override check_state with command-specific options if provided
-    local_state: dict[str, Any] = check_state.copy()
-    if timeout is not None:
-        local_state["timeout"] = timeout
-    if output is not None:
-        local_state["output"] = output
-    if check_external is not None:
-        local_state["check_external"] = check_external
-    if check_local is not None:
-        local_state["check_local"] = check_local
-    if fix_redirects is not None:
-        local_state["fix_redirects"] = fix_redirects
-    if follow_gitignore is not None:
-        local_state["follow_gitignore"] = follow_gitignore
-    if include_pattern is not None:
-        local_state["include_pattern"] = include_pattern
-    if exclude_pattern is not None:
-        local_state["exclude_pattern"] = exclude_pattern
-    if parallel is not None:
-        local_state["parallel"] = parallel
-    if fail is not None:
-        local_state["fail"] = fail
-    if workers is not None:
-        local_state["workers"] = workers
-
-    # Update global check_state for this command execution
-    check_state.update(local_state)
-
-    echo_info("Checking for dead images...")
-    print_common_info(path)
-
-    checker: DeadImageChecker = DeadImageChecker(
-        timeout=check_state["timeout"],
-        check_external=check_state["check_external"],
-        check_local=check_state["check_local"],
-        fix_redirects=check_state["fix_redirects"],
-        follow_gitignore=check_state["follow_gitignore"],
-        parallel=check_state["parallel"],
-        workers=check_state["workers"],
-    )
-
-    # Use async processing for better performance
-    all_valid: bool
-    try:
-        all_valid = asyncio.run(process_path_and_check_async(checker, "images", path))
-    except RuntimeError:
-        # Fall back to sync if already in event loop
-        all_valid = process_path_and_check(checker, "images", path)
-
-    if not all_valid:
-        if check_state["fail"]:
-            echo_error("Some images are invalid or broken")
-            raise typer.Exit(1)
-        else:
-            echo_info("Some images are invalid or broken; continuing due to --no-fail")
-    else:
-        echo_success("All images are valid")
