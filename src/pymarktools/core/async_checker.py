@@ -6,7 +6,7 @@ import logging
 import os
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from .gitignore import get_gitignore_matcher, is_path_ignored
 
@@ -15,11 +15,19 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")  # Type for the result objects (LinkInfo, ImageInfo, etc.)
 
 
-class AsyncChecker(Generic[T]):
+class AsyncChecker[T]:
     """Base class for async checkers with utilities for concurrent processing."""
 
+    timeout: int
+    check_external: bool
+    fix_redirects: bool
+    follow_gitignore: bool
+    check_local: bool
+    parallel: bool
+    workers: int | None
+
     def __init__(
-        self,
+        self: "AsyncChecker",
         timeout: int = 30,
         check_external: bool = True,
         fix_redirects: bool = False,
@@ -37,7 +45,7 @@ class AsyncChecker(Generic[T]):
         self.workers = workers if workers is not None else os.cpu_count()
 
     async def discover_files_async(
-        self,
+        self: "AsyncChecker",
         directory: Path,
         include_pattern: str = "*.md",
         exclude_pattern: str | None = None,
@@ -115,7 +123,7 @@ class AsyncChecker(Generic[T]):
         # Start the async file discovery
         return await process_directory_level(directory)
 
-    def run_async_with_fallback(self, coro_func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    def run_async_with_fallback(self: "AsyncChecker", coro_func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Run an async function with fallback to thread pool if already in event loop."""
         try:
             asyncio.get_running_loop()
@@ -131,7 +139,7 @@ class AsyncChecker(Generic[T]):
             return asyncio.run(coro_func(*args, **kwargs))
 
     async def process_files_async(
-        self,
+        self: "AsyncChecker",
         files: list[Path],
         file_processor: Callable[[Path], Any],
         progress_callback: Callable[[Path, Any], None] | None = None,
@@ -176,7 +184,7 @@ class AsyncChecker(Generic[T]):
         return results
 
     async def process_items_async(
-        self,
+        self: "AsyncChecker",
         items: list[str],
         item_processor: Callable[[str], Any],
     ) -> dict[str, Any]:
@@ -226,7 +234,7 @@ class AsyncChecker(Generic[T]):
 
         return results
 
-    def is_external_url(self, url: str) -> bool:
+    def is_external_url(self: "AsyncChecker", url: str) -> bool:
         """Check if URL is external (has a scheme)."""
         # Common external URL schemes
         external_schemes = (

@@ -64,9 +64,7 @@ def echo_info(message: str, err: bool = False) -> None:
 
 
 def check(
-    path: Path | None = typer.Argument(
-        None, help="Path to markdown file or directory (defaults to current directory)"
-    ),
+    path: Path | None = typer.Argument(None, help="Path to markdown file or directory (defaults to current directory)"),
     timeout: int = typer.Option(check_options["timeout"], "--timeout", "-t", help="Request timeout in seconds"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output file for the report"),
     check_external: bool = typer.Option(
