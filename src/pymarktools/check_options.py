@@ -1,26 +1,9 @@
-"""Global state for pymarktools CLI."""
+"""Default options for the ``check`` command."""
 
 from pathlib import Path
 from typing import Optional, TypedDict
 
 
-# Global state for options that apply to all commands
-class GlobalState(TypedDict):
-    """Global state for pymarktools CLI options."""
-
-    verbose: bool
-    quiet: bool
-    color: bool
-
-
-global_state: GlobalState = GlobalState(
-    verbose=False,
-    quiet=False,
-    color=True,  # Default to enabled
-)
-
-
-# Default options for the ``check`` command
 class CheckOptions(TypedDict):
     """Default configuration for the :mod:`pymarktools.commands.check` module."""
 

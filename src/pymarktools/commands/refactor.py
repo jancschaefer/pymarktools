@@ -6,7 +6,7 @@ from typing import Optional
 import typer
 
 from ..core.refactor import FileReference, FileReferenceManager
-from ..state import global_state
+from ..global_state import global_state
 
 # Create a subcommand group for refactor operations
 refactor_app: typer.Typer = typer.Typer(

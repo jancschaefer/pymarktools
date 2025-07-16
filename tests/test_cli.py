@@ -130,7 +130,7 @@ def test_raise_helper():
 
 
 def test_color_env_var(monkeypatch, runner):
-    from pymarktools.state import global_state
+    from pymarktools.global_state import global_state
 
     monkeypatch.setenv("PYMARKTOOLS_COLOR", "false")
     result = runner.invoke(app, ["check", "--no-check-dead-images", "--help"])

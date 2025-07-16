@@ -8,7 +8,7 @@ from . import __version__
 
 # Import the command modules
 from .commands import check, refactor_app
-from .state import global_state
+from .global_state import global_state
 
 # Create the main application
 app: typer.Typer = typer.Typer(

@@ -1,3 +1,4 @@
+from pymarktools.check_options import check_options
 from pymarktools.commands.check import (
     echo_error,
     echo_if_not_quiet,
@@ -7,7 +8,7 @@ from pymarktools.commands.check import (
     echo_warning,
     print_common_info,
 )
-from pymarktools.state import check_options, global_state
+from pymarktools.global_state import global_state
 
 
 def test_echo_functions(capsys):

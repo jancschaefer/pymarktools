@@ -1,10 +1,11 @@
 from pathlib import Path
 
+from pymarktools.check_options import check_options
 from pymarktools.commands.check import print_common_info, process_path_and_check
 from pymarktools.core.image_checker import DeadImageChecker
 from pymarktools.core.link_checker import DeadLinkChecker
 from pymarktools.core.models import ImageInfo, LinkInfo
-from pymarktools.state import check_options, global_state
+from pymarktools.global_state import global_state
 
 
 def test_print_common_info_includes_fail(capsys, monkeypatch, tmp_path):

@@ -2,18 +2,19 @@
 
 ## [unreleased]
 
+## [0.3.0] - 2025-07-16
+
 ### Added
 
-- `--fail/--no-fail` option for all `check` commands to control exit behavior.
-
-## [0.3.0] - 2025-07-16
+- `--fail/--no-fail` option for the `check` command to control exit behavior.
 
 ### Changed
 
-- Replaced `check dead-links` and `check dead-images` subcommands with a unified
-  `check` command. Use `--no-check-dead-images` or `--no-check-dead-links` to
-  disable specific validations.
-- Bumped version to `0.3.0` due to breaking CLI changes.
+- **Restructured check command API**: Removed `check dead-links` and `check dead-images` subcommands and replaced with unified `check` command.
+- **New options**: Added `--check-dead-links/--no-check-dead-links` and `--check-dead-images/--no-check-dead-images` options (both default to enabled).
+- **Default behavior**: When no path specified, check current working directory; when path specified, check that specific file or directory.
+- **Both checks run by default**: Users can disable either check type selectively with the new flags.
+- **Migration required**: Old syntax `pymarktools check dead-links docs/` becomes `pymarktools check docs/ --no-check-dead-images`.
 
 ## [0.2.0] - 2025-07-08
 

@@ -7,9 +7,10 @@ from typing import Any, Optional, Union
 
 import typer
 
+from ..check_options import check_options
 from ..core.image_checker import DeadImageChecker
 from ..core.link_checker import DeadLinkChecker
-from ..state import check_options, global_state
+from ..global_state import global_state
 
 
 def echo_if_not_quiet(message: str, err: bool = False, color: Optional[str] = None) -> None:
