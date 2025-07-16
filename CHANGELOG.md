@@ -1,5 +1,11 @@
 # Pymarktools Changelog
 
+## [unreleased]
+
+### Added
+
+- `--fail/--no-fail` option for all `check` commands to control exit behavior.
+
 ## [0.2.0] - 2025-07-08
 
 ### [0.2.0] - Added
