@@ -129,6 +129,19 @@ def test_check_dead_images_with_invalid_images(runner, temp_markdown_file):
     assert "Found" in result.output
 
 
+def test_check_dead_links_no_fail_option(runner, temp_markdown_file):
+    """When --no-fail is passed, invalid links should not cause a non-zero exit."""
+    result = runner.invoke(app, ["check", "dead-links", str(temp_markdown_file), "--no-fail"])
+    assert result.exit_code == 0
+    assert "Checking for dead links" in result.output
+
+
+def test_check_dead_images_no_fail_global_option(runner, temp_markdown_file):
+    """--no-fail also works when specified on the check command group."""
+    result = runner.invoke(app, ["check", "--no-fail", "dead-images", str(temp_markdown_file)])
+    assert result.exit_code == 0
+    
+
 def test_check_dead_links_nonexistent_file(runner):
     result = runner.invoke(app, ["check", "dead-links", "nonexistent.md"])
     assert result.exit_code == 1
@@ -655,6 +668,8 @@ def test_check_local_help_options(runner):
     assert "--check-local" in clean_output
     assert "--no-check-local" in clean_output
     assert "local file links" in clean_output  # More flexible text check
+    assert "--fail" in clean_output
+    assert "--no-fail" in clean_output
 
     result = runner.invoke(app, ["check", "dead-images", "--help"])
     assert result.exit_code == 0
@@ -663,3 +678,5 @@ def test_check_local_help_options(runner):
     assert "--check-local" in clean_output
     assert "--no-check-local" in clean_output
     assert "local file images" in clean_output  # Should match "local file images exist"
+    assert "--fail" in clean_output
+    assert "--no-fail" in clean_output

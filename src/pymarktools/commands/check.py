@@ -26,6 +26,7 @@ check_state: dict[str, Any] = {
     "exclude_pattern": None,
     "parallel": True,
     "workers": None,  # Will default to cpu_count() in checkers
+    "fail": True,
 }
 
 
@@ -120,6 +121,11 @@ def check_callback(
         "--parallel/--no-parallel",
         help="Enable parallel processing for external URL checks",
     ),
+    fail: bool = typer.Option(
+        True,
+        "--fail/--no-fail",
+        help="Exit with status 1 if invalid links/images are found",
+    ),
     workers: Optional[int] = typer.Option(
         None,
         "--workers",
@@ -140,6 +146,7 @@ def check_callback(
             "include_pattern": include_pattern,
             "exclude_pattern": exclude_pattern,
             "parallel": parallel,
+            "fail": fail,
             "workers": workers,
         }
     )
@@ -163,6 +170,7 @@ def print_common_info(path: Path) -> None:
         echo_if_verbose(f"Worker threads: {os.cpu_count()} (auto-detected)")
     if check_state["output"]:
         echo_if_verbose(f"Report will be saved to: {check_state['output']}")
+    echo_if_verbose(f"Fail on invalid items: {check_state['fail']}")
 
 
 def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], item_type: str, path: Path) -> bool:
@@ -377,6 +385,11 @@ def check_dead_links(
         "--parallel/--no-parallel",
         help="Enable parallel processing for external URL checks",
     ),
+    fail: Optional[bool] = typer.Option(
+        None,
+        "--fail/--no-fail",
+        help="Exit with status 1 if invalid links are found",
+    ),
     workers: Optional[int] = typer.Option(
         None,
         "--workers",
@@ -409,6 +422,8 @@ def check_dead_links(
         local_state["exclude_pattern"] = exclude_pattern
     if parallel is not None:
         local_state["parallel"] = parallel
+    if fail is not None:
+        local_state["fail"] = fail
     if workers is not None:
         local_state["workers"] = workers
 
@@ -438,7 +453,8 @@ def check_dead_links(
 
     if not all_valid:
         echo_error("Some links are invalid or broken")
-        raise typer.Exit(1)
+        if check_state["fail"]:
+            raise typer.Exit(1)
     else:
         echo_success("All links are valid")
 
@@ -487,6 +503,11 @@ def check_dead_images(
         "--parallel/--no-parallel",
         help="Enable parallel processing for external URL checks",
     ),
+    fail: Optional[bool] = typer.Option(
+        None,
+        "--fail/--no-fail",
+        help="Exit with status 1 if invalid images are found",
+    ),
     workers: Optional[int] = typer.Option(
         None,
         "--workers",
@@ -519,6 +540,8 @@ def check_dead_images(
         local_state["exclude_pattern"] = exclude_pattern
     if parallel is not None:
         local_state["parallel"] = parallel
+    if fail is not None:
+        local_state["fail"] = fail
     if workers is not None:
         local_state["workers"] = workers
 
@@ -548,6 +571,7 @@ def check_dead_images(
 
     if not all_valid:
         echo_error("Some images are invalid or broken")
-        raise typer.Exit(1)
+        if check_state["fail"]:
+            raise typer.Exit(1)
     else:
         echo_success("All images are valid")

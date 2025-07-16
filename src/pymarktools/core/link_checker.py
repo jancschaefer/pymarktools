@@ -96,7 +96,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             # This is a basic check - we're just verifying the domain resolves
             domain_url = f"https://{domain}"
 
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False, verify=False) as client:
                 response: httpx.Response = await client.head(domain_url)
                 result["status_code"] = response.status_code
 
@@ -172,7 +172,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             return await self.check_email_domain_async(url)
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False, verify=False) as client:
                 response: httpx.Response = await client.head(url)
                 result["status_code"] = response.status_code
 
