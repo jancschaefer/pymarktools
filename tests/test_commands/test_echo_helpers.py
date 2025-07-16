@@ -1,10 +1,12 @@
 from pymarktools.commands.check import (
+    check_state,
     echo_error,
     echo_if_not_quiet,
     echo_if_verbose,
     echo_info,
     echo_success,
     echo_warning,
+    print_common_info,
 )
 from pymarktools.state import global_state
 
@@ -32,9 +34,7 @@ def test_echo_verbose(capsys):
     assert "verbose msg" in captured.out
 
 
-def test_print_common_info(capsys, tmp_path):
-    from pymarktools.commands.check import check_state, print_common_info
-
+def test_echo_print_common_info(capsys, tmp_path):
     global_state.update({"verbose": True, "quiet": False, "color": False})
     check_state.update({"include_pattern": "*.md", "parallel": True, "output": None, "workers": None})
     print_common_info(tmp_path)
