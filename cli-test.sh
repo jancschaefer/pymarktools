@@ -128,9 +128,14 @@ run_test "Check only images (disable links)" "uv run pymarktools check $temp_dir
 # Section: Exit Behavior Testing
 echo -e "${BLUE}=== Testing Exit Behavior ===${NC}"
 
-run_test "Default fail behavior" "uv run pymarktools check $temp_dir/sample.md"
-run_test "Disable fail on errors" "uv run pymarktools check $temp_dir/sample.md --no-fail"
-run_test "Explicit fail on errors" "uv run pymarktools check $temp_dir/sample.md --fail"
+run_test "Default fail behavior" "uv run pymarktools check $temp_dir/sample.md --no-check-external"
+run_test "Disable fail on errors" "uv run pymarktools check $temp_dir/sample.md --no-fail --no-check-external"
+run_test "Explicit fail on errors" "uv run pymarktools check $temp_dir/sample.md --fail --no-check-external"
+
+# Section: Both Checks Disabled Error
+echo -e "${BLUE}=== Testing Error Conditions ===${NC}"
+
+run_test "Both checks disabled error" "uv run pymarktools check $temp_dir/sample.md --no-check-dead-links --no-check-dead-images"
 
 # Section: Flexible Option Placement
 echo -e "${BLUE}=== Testing Flexible Option Placement ===${NC}"
