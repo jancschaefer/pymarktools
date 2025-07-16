@@ -67,58 +67,60 @@ def check(
     path: Optional[Path] = typer.Argument(
         None, help="Path to markdown file or directory (defaults to current directory)"
     ),
-    timeout: int = typer.Option(30, "--timeout", "-t", help="Request timeout in seconds"),
+    timeout: int = typer.Option(check_options["timeout"], "--timeout", "-t", help="Request timeout in seconds"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for the report"),
     check_external: bool = typer.Option(
-        True,
+        check_options["check_external"],
         "--check-external/--no-check-external",
         help="Whether to check external links/images with HTTP requests",
     ),
     check_local: bool = typer.Option(
-        True,
+        check_options["check_local"],
         "--check-local/--no-check-local",
         help="Whether to check if local file links/images exist",
     ),
     fix_redirects: bool = typer.Option(
-        False,
+        check_options["fix_redirects"],
         "--fix-redirects",
         help="Update links/images with permanent redirects in the source files",
     ),
     follow_gitignore: bool = typer.Option(
-        True,
+        check_options["follow_gitignore"],
         "--follow-gitignore/--no-follow-gitignore",
         help="Respect .gitignore patterns when scanning directories",
     ),
     include_pattern: str = typer.Option(
-        "*.md",
+        check_options["include_pattern"],
         "--include",
         "-i",
         help="File pattern to include when searching for references",
     ),
     exclude_pattern: Optional[str] = typer.Option(
-        None,
+        check_options["exclude_pattern"],
         "--exclude",
         "-e",
         help="File pattern to exclude when searching for references",
     ),
     parallel: bool = typer.Option(
-        True,
+        check_options["parallel"],
         "--parallel/--no-parallel",
         help="Enable parallel processing for external URL checks",
     ),
     fail: bool = typer.Option(
-        True,
+        check_options["fail"],
         "--fail/--no-fail",
         help="Exit with status 1 if invalid links/images are found",
     ),
     workers: Optional[int] = typer.Option(
-        None,
+        check_options["workers"],
         "--workers",
         "-w",
         help="Number of worker threads for parallel processing (defaults to CPU count)",
     ),
-    check_dead_links: bool = typer.Option(True, "--check-dead-links/--no-check-dead-links", help="Validate links"),
-    check_dead_images: bool = typer.Option(True, "--check-dead-images/--no-check-dead-images", help="Validate images"),
+    check_dead_links: bool = typer.Option(
+        check_options["check_dead_links"], "--check-dead-links/--no-check-dead-links", help="Validate links"),
+    check_dead_images: bool = typer.Option(
+        check_options["check_dead_images"], "--check-dead-images/--no-check-dead-images", help="Validate images"),
 ) -> None:
     """Check markdown files for dead links and images."""
     if path is None:
