@@ -118,9 +118,11 @@ def check(
         help="Number of worker threads for parallel processing (defaults to CPU count)",
     ),
     check_dead_links: bool = typer.Option(
-        check_options["check_dead_links"], "--check-dead-links/--no-check-dead-links", help="Validate links"),
+        check_options["check_dead_links"], "--check-dead-links/--no-check-dead-links", help="Validate links"
+    ),
     check_dead_images: bool = typer.Option(
-        check_options["check_dead_images"], "--check-dead-images/--no-check-dead-images", help="Validate images"),
+        check_options["check_dead_images"], "--check-dead-images/--no-check-dead-images", help="Validate images"
+    ),
 ) -> None:
     """Check markdown files for dead links and images."""
     if path is None:
