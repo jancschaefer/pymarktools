@@ -16,6 +16,7 @@ A set of markdown utilities for Python, designed to simplify the manipulation an
 - **Color output** with visual status indicators and customizable display
 - **Verbose and quiet modes** for detailed output control
 - **Exit code behavior** suitable for CI/CD pipelines (0 for success, 1 for failures)
+- **Optional fail behavior** with `--fail/--no-fail` to control exit codes
 - **File refactoring** capabilities to move files and update references
 
 ## Installation
@@ -280,6 +281,8 @@ The tool returns appropriate exit codes for automation:
 
 - **Exit code 0**: All checks passed successfully
 - **Exit code 1**: Invalid links/images found or errors occurred
+
+You can disable this behavior with the `--no-fail` option on any check command.
 
 This makes it suitable for CI/CD pipelines:
 

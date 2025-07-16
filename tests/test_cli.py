@@ -140,7 +140,7 @@ def test_check_dead_images_no_fail_global_option(runner, temp_markdown_file):
     """--no-fail also works when specified on the check command group."""
     result = runner.invoke(app, ["check", "--no-fail", "dead-images", str(temp_markdown_file)])
     assert result.exit_code == 0
-    
+
 
 def test_check_dead_links_nonexistent_file(runner):
     result = runner.invoke(app, ["check", "dead-links", "nonexistent.md"])
