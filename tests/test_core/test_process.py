@@ -22,6 +22,8 @@ def test_print_common_info_includes_fail(capsys, monkeypatch, tmp_path):
 
 
 class DummyLinkChecker(DeadLinkChecker):
+    """Stub link checker used in tests to avoid network access."""
+
     def __init__(self, result: list[LinkInfo]):
         super().__init__(check_external=False)
         self.result = result
@@ -31,6 +33,8 @@ class DummyLinkChecker(DeadLinkChecker):
 
 
 class DummyImageChecker(DeadImageChecker):
+    """Stub image checker for tests with a configurable result."""
+
     def __init__(self, result: list[ImageInfo]):
         super().__init__(check_external=False)
         self.result = result

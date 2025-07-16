@@ -142,6 +142,12 @@ def test_check_dead_images_no_fail_global_option(runner, temp_markdown_file):
     assert result.exit_code == 0
 
 
+def test_check_dead_links_fail_option(runner, temp_markdown_file):
+    """Explicit --fail should cause a non-zero exit when links are invalid."""
+    result = runner.invoke(app, ["check", "--fail", "dead-links", str(temp_markdown_file)])
+    assert result.exit_code == 1
+
+
 def test_check_dead_links_nonexistent_file(runner):
     result = runner.invoke(app, ["check", "dead-links", "nonexistent.md"])
     assert result.exit_code == 1
