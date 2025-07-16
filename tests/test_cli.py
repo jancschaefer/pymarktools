@@ -84,16 +84,12 @@ def test_cli_help(runner):
     assert "pymarktools" in result.output
 
 
-def test_check_dead_links_help(runner):
-    result = runner.invoke(app, ["check", "dead-links", "--help"])
+def test_check_help(runner):
+    result = runner.invoke(app, ["check", "--help"])
     assert result.exit_code == 0
-    assert "Check for dead links" in result.output
-
-
-def test_check_dead_images_help(runner):
-    result = runner.invoke(app, ["check", "dead-images", "--help"])
-    assert result.exit_code == 0
-    assert "Check for dead images" in result.output
+    assert "Check markdown files for dead links and images" in result.output
+    assert "--check-dead-links" in result.output
+    assert "--check-dead-images" in result.output
 
 
 def test_cli_version(runner):
@@ -107,7 +103,7 @@ def test_cli_version(runner):
 def test_verbose_flag(runner, temp_valid_markdown_file):
     result = runner.invoke(
         app,
-        ["--verbose", "check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"],
+        ["--verbose", "check", str(temp_valid_markdown_file), "--no-check-external"],
     )
     assert result.exit_code == 0
     assert "Verbose mode enabled" in result.output
@@ -116,7 +112,7 @@ def test_verbose_flag(runner, temp_valid_markdown_file):
 def test_quiet_flag(runner, temp_valid_markdown_file):
     result = runner.invoke(
         app,
-        ["--quiet", "check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"],
+        ["--quiet", "check", str(temp_valid_markdown_file), "--no-check-external"],
     )
     assert result.exit_code == 0
     assert "Quiet mode enabled" in result.stderr
@@ -133,71 +129,65 @@ def test_color_env_var(monkeypatch, runner):
     from pymarktools.state import global_state
 
     monkeypatch.setenv("PYMARKTOOLS_COLOR", "false")
-    result = runner.invoke(app, ["check", "dead-links", "--help"])
+    result = runner.invoke(app, ["check", "--help"])
     assert result.exit_code == 0
     assert global_state["color"] is False
 
 
-def test_check_dead_links_with_file(runner, temp_valid_markdown_file):
-    result = runner.invoke(app, ["check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"])
+def test_check_with_file_links_only(runner, temp_valid_markdown_file):
+    result = runner.invoke(app, ["check", str(temp_valid_markdown_file), "--no-check-external", "--no-check-dead-images"])
     assert result.exit_code == 0
-    assert "Checking for dead links" in result.output
+    assert "Checking markdown files" in result.output
     assert "Found" in result.output
 
 
-def test_check_dead_images_with_file(runner, temp_valid_markdown_file):
+def test_check_with_file_images_only(runner, temp_valid_markdown_file):
     result = runner.invoke(
         app,
-        ["check", "dead-images", str(temp_valid_markdown_file), "--no-check-external"],
+        ["check", str(temp_valid_markdown_file), "--no-check-external", "--no-check-dead-links"],
     )
     assert result.exit_code == 0
-    assert "Checking for dead images" in result.output
+    assert "Checking markdown files" in result.output
     assert "Found" in result.output
 
 
-def test_check_dead_links_with_invalid_links(runner, temp_markdown_file):
+def test_check_with_invalid_links(runner, temp_markdown_file):
     """Test that invalid links cause exit code 1."""
-    result = runner.invoke(app, ["check", "dead-links", str(temp_markdown_file)])
+    result = runner.invoke(app, ["check", str(temp_markdown_file), "--no-check-dead-images"])
     assert result.exit_code == 1
-    assert "Checking for dead links" in result.output
+    assert "Checking markdown files" in result.output
     assert "Found" in result.output
 
 
-def test_check_dead_images_with_invalid_images(runner, temp_markdown_file):
+def test_check_with_invalid_images(runner, temp_markdown_file):
     """Test that invalid images cause exit code 1."""
-    result = runner.invoke(app, ["check", "dead-images", str(temp_markdown_file)])
+    result = runner.invoke(app, ["check", str(temp_markdown_file), "--no-check-dead-links"])
     assert result.exit_code == 1
-    assert "Checking for dead images" in result.output
+    assert "Checking markdown files" in result.output
     assert "Found" in result.output
 
 
-def test_check_dead_links_no_fail_option(runner, temp_markdown_file):
+def test_check_no_fail_option(runner, temp_markdown_file):
     """When --no-fail is passed, invalid links should not cause a non-zero exit."""
-    result = runner.invoke(app, ["check", "dead-links", str(temp_markdown_file), "--no-fail"])
+    result = runner.invoke(app, ["check", str(temp_markdown_file), "--no-fail"])
     assert result.exit_code == 0
-    assert "Checking for dead links" in result.output
+    assert "Checking markdown files" in result.output
 
 
-def test_check_dead_images_no_fail_global_option(runner, temp_markdown_file):
+def test_check_no_fail_global_option(runner, temp_markdown_file):
     """--no-fail also works when specified on the check command group."""
-    result = runner.invoke(app, ["check", "--no-fail", "dead-images", str(temp_markdown_file)])
+    result = runner.invoke(app, ["check", "--no-fail", str(temp_markdown_file)])
     assert result.exit_code == 0
 
 
-def test_check_dead_links_fail_option(runner, temp_markdown_file):
+def test_check_fail_option(runner, temp_markdown_file):
     """Explicit --fail should cause a non-zero exit when links are invalid."""
-    result = runner.invoke(app, ["check", "--fail", "dead-links", str(temp_markdown_file)])
+    result = runner.invoke(app, ["check", "--fail", str(temp_markdown_file)])
     assert result.exit_code == 1
 
 
-def test_check_dead_links_nonexistent_file(runner):
-    result = runner.invoke(app, ["check", "dead-links", "nonexistent.md"])
-    assert result.exit_code == 1
-    assert "Error:" in result.output
-
-
-def test_check_dead_images_nonexistent_file(runner):
-    result = runner.invoke(app, ["check", "dead-images", "nonexistent.md"])
+def test_check_nonexistent_file(runner):
+    result = runner.invoke(app, ["check", "nonexistent.md"])
     assert result.exit_code == 1
     assert "Error:" in result.output
 
@@ -230,8 +220,8 @@ def test_refactor_move_dry_run(runner, temp_markdown_file):
     assert "Would move:" in result.output
 
 
-def test_check_dead_links_respects_gitignore(runner):
-    """Test that check dead-links respects .gitignore patterns."""
+def test_check_respects_gitignore(runner):
+    """Test that check respects .gitignore patterns."""
     import tempfile
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -267,7 +257,7 @@ ignore-me.md
         build_md.write_text("# Build File\n\n[Link](https://another-broken-link.example)")
 
         # Test with gitignore enabled (default)
-        result = runner.invoke(app, ["check", "dead-links", str(temp_path), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(temp_path), "--no-check-external"])
         assert result.exit_code == 0
 
         # Strip ANSI codes for reliable comparison
@@ -288,7 +278,6 @@ ignore-me.md
             app,
             [
                 "check",
-                "dead-links",
                 str(temp_path),
                 "--no-check-external",
                 "--no-follow-gitignore",
@@ -302,8 +291,8 @@ ignore-me.md
         assert "build.md" in result.output
 
 
-def test_check_dead_images_respects_gitignore(runner):
-    """Test that check dead-images respects .gitignore patterns."""
+def test_check_respects_gitignore_images(runner):
+    """Test that check respects .gitignore patterns for images."""
     import tempfile
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -334,7 +323,7 @@ docs/
         docs_md.write_text("# Doc File\n\n![Image](doc-image.jpg)")
 
         # Test with gitignore enabled
-        result = runner.invoke(app, ["check", "dead-images", str(temp_path), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(temp_path), "--no-check-external", "--no-check-dead-links"])
 
         # Don't check exit code as it might be platform dependent based on
         # if gitignore works differently on different platforms
@@ -406,7 +395,7 @@ local-ignore.md
         (sub_dir / "local-ignore.md").write_text(
             "# Local ignore\n\n[Link](https://example.com)"
         )  # Test checking from root
-        result = runner.invoke(app, ["check", "dead-links", str(temp_path), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(temp_path), "--no-check-external", "--no-check-dead-images"])
 
         # Strip ANSI codes for reliable comparison
         clean_output = strip_ansi(result.output)
@@ -441,7 +430,7 @@ local-ignore.md
             assert len(checked_files) == 2, f"Expected 2 files, found {len(checked_files)}:\n{file_list}"
 
         # Test checking from subdirectory
-        result = runner.invoke(app, ["check", "dead-links", str(sub_dir), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(sub_dir), "--no-check-external", "--no-check-dead-images"])
 
         # Strip ANSI codes for reliable comparison
         clean_output = strip_ansi(result.output)
@@ -518,7 +507,7 @@ Thumbs.db
         (temp_path / "script.pyc").write_text("compiled python")
 
         # Test that only non-ignored files are checked
-        result = runner.invoke(app, ["check", "dead-links", str(temp_path), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(temp_path), "--no-check-external", "--no-check-dead-images"])
 
         # Strip ANSI codes for reliable comparison
         clean_output = strip_ansi(result.output)
@@ -553,7 +542,7 @@ Thumbs.db
                 assert len(check_lines) == 0, f"Found {ignored_dir} files in output: {check_lines}"
 
 
-def test_check_dead_links_local_files(runner):
+def test_check_local_files(runner):
     """Test checking local file links."""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -572,7 +561,7 @@ def test_check_dead_links_local_files(runner):
 """)
 
         # Test with local checking enabled (default)
-        result = runner.invoke(app, ["check", "dead-links", str(md_file), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(md_file), "--no-check-external", "--no-check-dead-images"])
         assert result.exit_code == 1  # Should fail because missing.md doesn't exist
 
         # Should show local file status
@@ -581,7 +570,7 @@ def test_check_dead_links_local_files(runner):
         assert "missing.md" in result.output
 
 
-def test_check_dead_links_no_local_check(runner):
+def test_check_no_local_check(runner):
     """Test disabling local file checking."""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -599,10 +588,10 @@ def test_check_dead_links_no_local_check(runner):
             app,
             [
                 "check",
-                "dead-links",
                 str(md_file),
                 "--no-check-external",
                 "--no-check-local",
+                "--no-check-dead-images",
             ],
         )
         assert result.exit_code == 0
@@ -614,7 +603,7 @@ def test_check_dead_links_no_local_check(runner):
         assert "[INVALID]" not in result.output
 
 
-def test_check_dead_images_local_files(runner):
+def test_check_local_image_files(runner):
     """Test checking local image files."""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -632,7 +621,7 @@ def test_check_dead_images_local_files(runner):
 """)
 
         # Test with local checking enabled (default)
-        result = runner.invoke(app, ["check", "dead-images", str(md_file), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(md_file), "--no-check-external", "--no-check-dead-links"])
         assert result.exit_code == 1  # Should fail because missing.png doesn't exist
 
         # Should show local image status
@@ -641,7 +630,7 @@ def test_check_dead_images_local_files(runner):
         assert "missing.png" in result.output
 
 
-def test_check_dead_images_no_local_check(runner):
+def test_check_no_local_image_check(runner):
     """Test disabling local image checking."""
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -659,10 +648,10 @@ def test_check_dead_images_no_local_check(runner):
             app,
             [
                 "check",
-                "dead-images",
                 str(md_file),
                 "--no-check-external",
                 "--no-check-local",
+                "--no-check-dead-links",
             ],
         )
         assert result.exit_code == 0
@@ -698,7 +687,7 @@ def test_check_local_path_resolution(runner):
 """)
 
         # Test with local checking enabled
-        result = runner.invoke(app, ["check", "dead-links", str(md_file), "--no-check-external"])
+        result = runner.invoke(app, ["check", str(md_file), "--no-check-external", "--no-check-dead-images"])
         assert result.exit_code == 1  # Should fail because ../missing.md doesn't exist
 
         # Should resolve relative paths correctly
@@ -706,25 +695,32 @@ def test_check_local_path_resolution(runner):
         assert "[LOCAL]" in result.output
 
 
-def test_check_local_help_options(runner):
-    """Test that help shows the new local checking options."""
-    result = runner.invoke(app, ["check", "dead-links", "--help"])
+def test_check_help_options(runner):
+    """Test that help shows the new checking options."""
+    result = runner.invoke(app, ["check", "--help"])
     assert result.exit_code == 0
 
     # Strip ANSI codes for reliable testing
     clean_output = strip_ansi(result.output)
     assert "--check-local" in clean_output
     assert "--no-check-local" in clean_output
-    assert "local file links" in clean_output  # More flexible text check
+    assert "--check-dead-links" in clean_output
+    assert "--check-dead-images" in clean_output
     assert "--fail" in clean_output
     assert "--no-fail" in clean_output
 
-    result = runner.invoke(app, ["check", "dead-images", "--help"])
+
+def test_check_both_disabled_error(runner, temp_valid_markdown_file):
+    """Test that disabling both check types causes an error."""
+    result = runner.invoke(app, ["check", str(temp_valid_markdown_file), "--no-check-dead-links", "--no-check-dead-images"])
+    assert result.exit_code == 1
+    assert "Both --no-check-dead-links and --no-check-dead-images specified" in result.output
+    assert "At least one check type must be enabled" in result.output
+
+
+def test_check_default_behavior(runner, temp_valid_markdown_file):
+    """Test that both checks run by default."""
+    result = runner.invoke(app, ["check", str(temp_valid_markdown_file), "--no-check-external"])
     assert result.exit_code == 0
-
-    clean_output = strip_ansi(result.output)
-    assert "--check-local" in clean_output
-    assert "--no-check-local" in clean_output
-    assert "local file images" in clean_output  # Should match "local file images exist"
-    assert "--fail" in clean_output
-    assert "--no-fail" in clean_output
+    assert "Checking for dead links" in result.output
+    assert "Checking for dead images" in result.output
