@@ -1,22 +1,22 @@
 """Default options for the ``check`` command."""
 
 from pathlib import Path
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 
 class CheckOptions(TypedDict):
     """Default configuration for the :mod:`pymarktools.commands.check` module."""
 
     timeout: int
-    output: Optional[Path]
+    output: Path | None
     check_external: bool
     check_local: bool
     fix_redirects: bool
     follow_gitignore: bool
     include_pattern: str
-    exclude_pattern: Optional[str]
+    exclude_pattern: str | None
     parallel: bool
-    workers: Optional[int]
+    workers: int | None
     fail: bool
     check_dead_links: bool
     check_dead_images: bool

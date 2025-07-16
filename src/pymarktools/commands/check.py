@@ -3,7 +3,7 @@
 import asyncio
 import os
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import typer
 
@@ -13,7 +13,7 @@ from ..core.link_checker import DeadLinkChecker
 from ..global_state import global_state
 
 
-def echo_if_not_quiet(message: str, err: bool = False, color: Optional[str] = None) -> None:
+def echo_if_not_quiet(message: str, err: bool = False, color: str | None = None) -> None:
     """Echo message only if not in quiet mode."""
     if not global_state.get("quiet", False):
         if global_state.get("color", True) and color:
@@ -22,7 +22,7 @@ def echo_if_not_quiet(message: str, err: bool = False, color: Optional[str] = No
             typer.echo(message, err=err)
 
 
-def echo_if_verbose(message: str, err: bool = False, color: Optional[str] = None) -> None:
+def echo_if_verbose(message: str, err: bool = False, color: str | None = None) -> None:
     """Echo message only if in verbose mode."""
     if global_state.get("verbose", False):
         if global_state.get("color", True) and color:
@@ -64,11 +64,11 @@ def echo_info(message: str, err: bool = False) -> None:
 
 
 def check(
-    path: Optional[Path] = typer.Argument(
+    path: Path | None = typer.Argument(
         None, help="Path to markdown file or directory (defaults to current directory)"
     ),
     timeout: int = typer.Option(check_options["timeout"], "--timeout", "-t", help="Request timeout in seconds"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for the report"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file for the report"),
     check_external: bool = typer.Option(
         check_options["check_external"],
         "--check-external/--no-check-external",
@@ -95,7 +95,7 @@ def check(
         "-i",
         help="File pattern to include when searching for references",
     ),
-    exclude_pattern: Optional[str] = typer.Option(
+    exclude_pattern: str | None = typer.Option(
         check_options["exclude_pattern"],
         "--exclude",
         "-e",
@@ -111,7 +111,7 @@ def check(
         "--fail/--no-fail",
         help="Exit with status 1 if invalid links/images are found",
     ),
-    workers: Optional[int] = typer.Option(
+    workers: int | None = typer.Option(
         check_options["workers"],
         "--workers",
         "-w",
@@ -231,7 +231,7 @@ def print_common_info(path: Path, options: CheckOptions) -> None:
 
 
 def process_path_and_check(
-    checker: Union[DeadLinkChecker, DeadImageChecker],
+    checker: DeadLinkChecker | DeadImageChecker,
     item_type: str,
     path: Path,
     options: CheckOptions,
@@ -286,7 +286,7 @@ def process_path_and_check(
 
 
 async def process_path_and_check_async(
-    checker: Union[DeadLinkChecker, DeadImageChecker],
+    checker: DeadLinkChecker | DeadImageChecker,
     item_type: str,
     path: Path,
     options: CheckOptions,

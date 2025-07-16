@@ -75,8 +75,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
-target-version = 'py39'
-extend-exclude = ['pydantic/v1', 'tests/mypy/']
+target-version = 'py312'
 
 [tool.ruff.lint]
 select = [

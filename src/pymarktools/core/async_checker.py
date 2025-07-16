@@ -4,8 +4,9 @@ import asyncio
 import fnmatch
 import logging
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from .gitignore import get_gitignore_matcher, is_path_ignored
 
@@ -25,7 +26,7 @@ class AsyncChecker(Generic[T]):
         follow_gitignore: bool = True,
         check_local: bool = True,
         parallel: bool = True,
-        workers: Optional[int] = None,
+        workers: int | None = None,
     ):
         self.timeout = timeout
         self.check_external = check_external
@@ -39,18 +40,18 @@ class AsyncChecker(Generic[T]):
         self,
         directory: Path,
         include_pattern: str = "*.md",
-        exclude_pattern: Optional[str] = None,
+        exclude_pattern: str | None = None,
     ) -> list[Path]:
         """Discover files asynchronously with first-level directory listing and parallel expansion."""
         if not directory.is_dir():
             return [directory] if directory.is_file() else []
 
         # Get gitignore matcher if needed
-        gitignore_matcher: Optional[Callable[[str], bool]] = None
+        gitignore_matcher: Callable[[str], bool] | None = None
         if self.follow_gitignore:
             gitignore_matcher = get_gitignore_matcher(directory)
 
-        async def check_and_add_file(file_path: Path) -> Optional[Path]:
+        async def check_and_add_file(file_path: Path) -> Path | None:
             """Check if a file should be included."""
             if not file_path.is_file():
                 return None
@@ -87,10 +88,10 @@ class AsyncChecker(Generic[T]):
                         subdirs.append(item)
 
                 # Process files in current directory
-                file_tasks: list[asyncio.Task[Optional[Path]]] = [
+                file_tasks: list[asyncio.Task[Path | None]] = [
                     asyncio.create_task(check_and_add_file(file_path)) for file_path in files
                 ]
-                file_results: list[Optional[Path] | BaseException] = await asyncio.gather(
+                file_results: list[Path | None | BaseException] = await asyncio.gather(
                     *file_tasks, return_exceptions=True
                 )
 
@@ -133,7 +134,7 @@ class AsyncChecker(Generic[T]):
         self,
         files: list[Path],
         file_processor: Callable[[Path], Any],
-        progress_callback: Optional[Callable[[Path, Any], None]] = None,
+        progress_callback: Callable[[Path, Any], None] | None = None,
     ) -> dict[Path, Any]:
         """Process files asynchronously with progress callbacks."""
         results: dict[Path, Any] = {}

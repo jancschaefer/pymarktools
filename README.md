@@ -1,5 +1,13 @@
 # pymarktools
 
+![PyPI - Status](https://img.shields.io/pypi/status/pymarktools) ![PyPI - Version](https://img.shields.io/pypi/v/pymarktools)
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jancschaefer/pymarktools/.github%2Fworkflows%2Ftest.yml?branch=main)
+![GitHub License](https://img.shields.io/github/license/jancschaefer/pymarktools)
+[![codecov](https://codecov.io/gh/jancschaefer/pymarktools/branch/main/graph/badge.svg?token=IYBZMD627X)](https://codecov.io/gh/jancschaefer/pymarktools) ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjancschaefer%2Fpymarktools%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
+
+
+
 A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing.
 
 ## Features

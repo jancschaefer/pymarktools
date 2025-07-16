@@ -1,7 +1,7 @@
 """Gitignore handling utilities for markdown processing."""
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from gitignore_parser import parse_gitignore
 
