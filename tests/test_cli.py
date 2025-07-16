@@ -87,9 +87,11 @@ def test_cli_help(runner):
 def test_check_help(runner):
     result = runner.invoke(app, ["check", "--help"])
     assert result.exit_code == 0
-    assert "Check markdown files for dead links and images" in result.output
-    assert "--check-dead-links" in result.output
-    assert "--check-dead-images" in result.output
+    # Strip ANSI codes for reliable comparison
+    clean_output = strip_ansi(result.output)
+    assert "Check markdown files for dead links and images" in clean_output
+    assert "--check-dead-links" in clean_output
+    assert "--check-dead-images" in clean_output
 
 
 def test_cli_version(runner):

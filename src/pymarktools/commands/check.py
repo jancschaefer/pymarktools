@@ -199,7 +199,7 @@ async def process_path_and_check_async(
             echo_if_not_quiet(f"Found {total_items} {item_type} across {len(results)} files")
 
             # Update has_invalid_items from the callback
-            has_invalid_items = has_invalid_items or has_invalid_items_ref[0]
+            has_invalid_items: bool = has_invalid_items or has_invalid_items_ref[0]
 
             # If not in verbose mode, display results at the end
             if not global_state.get("verbose", False):
@@ -336,20 +336,22 @@ def check_command(
     ),
 ) -> None:
     """Check markdown files for dead links and images.
-    
-    By default, both link and image checking are enabled. Use --no-check-dead-links 
+
+    By default, both link and image checking are enabled. Use --no-check-dead-links
     or --no-check-dead-images to disable specific checks.
-    
+
     Examples:
-        pymarktools check                              # Check current directory (both links and images)
-        pymarktools check docs/                       # Check specific directory 
+        pymarktools check                             # Check current directory (both links and images)
+        pymarktools check docs/                       # Check specific directory
         pymarktools check README.md                   # Check specific file
         pymarktools check --no-check-dead-images      # Check only links
         pymarktools check --no-check-dead-links       # Check only images
     """
     # Use current directory as default if no path specified
     if path is None:
-        path = Path.cwd()
+        resolved_path: Path = Path.cwd()
+    else:
+        resolved_path: Path = path
 
     # Update global state with command parameters
     check_state.update(
@@ -372,11 +374,13 @@ def check_command(
 
     # Validate that at least one check type is enabled
     if not check_state["check_dead_links"] and not check_state["check_dead_images"]:
-        echo_error("Error: Both --no-check-dead-links and --no-check-dead-images specified. At least one check type must be enabled.")
+        echo_error(
+            "Error: Both --no-check-dead-links and --no-check-dead-images specified. At least one check type must be enabled."
+        )
         raise typer.Exit(1)
 
+    print_common_info(resolved_path)
     echo_info("Checking markdown files...")
-    print_common_info(path)
 
     # Show what checks are enabled
     enabled_checks = []
@@ -391,7 +395,7 @@ def check_command(
     # Check dead links if enabled
     if check_state["check_dead_links"]:
         echo_info("Checking for dead links...")
-        
+
         link_checker = DeadLinkChecker(
             timeout=check_state["timeout"],
             check_external=check_state["check_external"],
@@ -402,19 +406,24 @@ def check_command(
             workers=check_state["workers"],
         )
 
-        try:
-            links_valid = asyncio.run(process_path_and_check_async(link_checker, "links", path))
-        except RuntimeError:
-            # Fall back to sync if already in event loop
-            links_valid = process_path_and_check(link_checker, "links", path)
-        
+        # Use async processing for directories with parallel enabled, otherwise use sync
+        if check_state.get("parallel", True) and resolved_path.is_dir():
+            try:
+                links_valid = asyncio.run(process_path_and_check_async(link_checker, "links", resolved_path))
+            except RuntimeError:
+                # Fall back to sync if already in event loop
+                links_valid = process_path_and_check(link_checker, "links", resolved_path)
+        else:
+            # Use sync processing for files or when parallel is disabled
+            links_valid = process_path_and_check(link_checker, "links", resolved_path)
+
         if not links_valid:
             all_valid = False
 
     # Check dead images if enabled
     if check_state["check_dead_images"]:
         echo_info("Checking for dead images...")
-        
+
         image_checker = DeadImageChecker(
             timeout=check_state["timeout"],
             check_external=check_state["check_external"],
@@ -425,12 +434,17 @@ def check_command(
             workers=check_state["workers"],
         )
 
-        try:
-            images_valid = asyncio.run(process_path_and_check_async(image_checker, "images", path))
-        except RuntimeError:
-            # Fall back to sync if already in event loop
-            images_valid = process_path_and_check(image_checker, "images", path)
-        
+        # Use async processing for directories with parallel enabled, otherwise use sync
+        if check_state.get("parallel", True) and resolved_path.is_dir():
+            try:
+                images_valid = asyncio.run(process_path_and_check_async(image_checker, "images", resolved_path))
+            except RuntimeError:
+                # Fall back to sync if already in event loop
+                images_valid = process_path_and_check(image_checker, "images", resolved_path)
+        else:
+            # Use sync processing for files or when parallel is disabled
+            images_valid = process_path_and_check(image_checker, "images", resolved_path)
+
         if not images_valid:
             all_valid = False
 
@@ -443,4 +457,3 @@ def check_command(
             echo_info("Some links or images are invalid or broken; continuing due to --no-fail")
     else:
         echo_success("All links and images are valid")
-
