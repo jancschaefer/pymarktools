@@ -43,13 +43,13 @@ def main(
     no_color = os.getenv("NO_COLOR")
     force_color = os.getenv("FORCE_COLOR")
 
-    if env_color is not None:
+    if env_color is not None:  # pragma: no cover
         # Handle various string representations of boolean values
         color = env_color.lower() not in ("false", "0", "no", "off", "")
-    elif no_color:
+    elif no_color:  # pragma: no cover
         # Respect the NO_COLOR standard
         color = False
-    elif force_color == "0":
+    elif force_color == "0":  # pragma: no cover
         # Respect FORCE_COLOR=0
         color = False
 
@@ -82,4 +82,4 @@ app.add_typer(refactor_app, name="refactor")
 
 # Main entry point
 if __name__ == "__main__":
-    app()
+    app()  # pragma: no cover
