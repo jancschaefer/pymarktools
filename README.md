@@ -4,20 +4,28 @@ A set of markdown utilities for Python, designed to simplify the manipulation an
 
 ## Features
 
-- **Command line interface** with flexible option placement and callback architecture
-- **Link validation** in markdown files with local and external URL checking
-- **Image validation** in markdown files with comprehensive error reporting
-- **Pattern filtering** with include/exclude glob patterns for targeted file processing
+### Validation
+
+- **Link validation** with local and external URL checking
+- **Image validation** with comprehensive error reporting
+- **Automatic fixing** of permanent redirects in markdown files
+- **Pattern filtering** with include/exclude glob patterns
 - **Local file checking** with proper path resolution and anchor support
 - **External URL validation** with HTTP requests and redirect handling
-- **Automatic fixing** of permanent redirects in markdown files
-- **Gitignore integration** respecting .gitignore patterns when scanning directories
-- **Async processing** with configurable worker concurrency for faster validation
-- **Color output** with visual status indicators and customizable display
+
+### Workflow
+
+- **Command line interface** with flexible option placement and callbacks
+- **Optional fail behavior** with `--fail/--no-fail` to control exit codes
+- **Gitignore integration** respecting `.gitignore` patterns
+- **File refactoring** capabilities to move files and update references
+
+### Usability and Performance
+
+- **Async processing** with configurable worker concurrency
+- **Color output** with visual status indicators
 - **Verbose and quiet modes** for detailed output control
 - **Exit code behavior** suitable for CI/CD pipelines (0 for success, 1 for failures)
-- **Optional fail behavior** with `--fail/--no-fail` to control exit codes
-- **File refactoring** capabilities to move files and update references
 
 ## Installation
 

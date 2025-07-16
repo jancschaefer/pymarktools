@@ -452,9 +452,11 @@ def check_dead_links(
         all_valid = process_path_and_check(checker, "links", path)
 
     if not all_valid:
-        echo_error("Some links are invalid or broken")
         if check_state["fail"]:
+            echo_error("Some links are invalid or broken")
             raise typer.Exit(1)
+        else:
+            echo_info("Some links are invalid or broken; continuing due to --no-fail")
     else:
         echo_success("All links are valid")
 
@@ -570,8 +572,10 @@ def check_dead_images(
         all_valid = process_path_and_check(checker, "images", path)
 
     if not all_valid:
-        echo_error("Some images are invalid or broken")
         if check_state["fail"]:
+            echo_error("Some images are invalid or broken")
             raise typer.Exit(1)
+        else:
+            echo_info("Some images are invalid or broken; continuing due to --no-fail")
     else:
         echo_success("All images are valid")
