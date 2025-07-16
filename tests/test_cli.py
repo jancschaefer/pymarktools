@@ -96,8 +96,50 @@ def test_check_dead_images_help(runner):
     assert "Check for dead images" in result.output
 
 
+def test_cli_version(runner):
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0
+    from pymarktools import __version__
+
+    assert __version__ in result.output
+
+
+def test_verbose_flag(runner, temp_valid_markdown_file):
+    result = runner.invoke(
+        app,
+        ["--verbose", "check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"],
+    )
+    assert result.exit_code == 0
+    assert "Verbose mode enabled" in result.output
+
+
+def test_quiet_flag(runner, temp_valid_markdown_file):
+    result = runner.invoke(
+        app,
+        ["--quiet", "check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"],
+    )
+    assert result.exit_code == 0
+    assert "Quiet mode enabled" in result.stderr
+
+
+def test_raise_helper():
+    from pymarktools.cli import raise_
+
+    with pytest.raises(ValueError):
+        raise_(ValueError("boom"))
+
+
+def test_color_env_var(monkeypatch, runner):
+    from pymarktools.state import global_state
+
+    monkeypatch.setenv("PYMARKTOOLS_COLOR", "false")
+    result = runner.invoke(app, ["check", "dead-links", "--help"])
+    assert result.exit_code == 0
+    assert global_state["color"] is False
+
+
 def test_check_dead_links_with_file(runner, temp_valid_markdown_file):
-    result = runner.invoke(app, ["check", "dead-links", str(temp_valid_markdown_file)])
+    result = runner.invoke(app, ["check", "dead-links", str(temp_valid_markdown_file), "--no-check-external"])
     assert result.exit_code == 0
     assert "Checking for dead links" in result.output
     assert "Found" in result.output
