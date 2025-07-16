@@ -353,6 +353,50 @@ pymarktools --quiet check --no-check-dead-images docs/ --no-check-external
 pymarktools check --no-check-dead-images . --include "*.md" --timeout 30 || exit 1
 ```
 
+## Configuration
+
+### pyproject.toml Support
+
+pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default behavior without specifying options on every command invocation.
+
+Add configuration under the `[tool.pymarktools]` section:
+
+```toml
+[tool.pymarktools]
+# Paths to check (replaces the PATH argument)
+paths = ["src", "docs", "README.md"]
+
+# Check options
+timeout = 60
+check_external = false
+check_local = true
+include_pattern = "*.md"
+exclude_pattern = "test_*.md"
+parallel = false
+fail = true
+workers = 4
+```
+
+**Usage with configuration:**
+
+```bash
+# Uses paths and options from pyproject.toml
+pymarktools check
+
+# CLI arguments override configuration values
+pymarktools check --timeout 30 --check-external
+
+# Explicit path overrides configured paths
+pymarktools check specific-file.md
+```
+
+**Priority order** (highest to lowest):
+1. Command-line arguments 
+2. pyproject.toml configuration
+3. Built-in defaults
+
+For complete configuration reference, see [docs/pyproject-config.md](docs/pyproject-config.md).
+
 ## Testing
 
 To run the tests for pymarktools, use the following commands:
