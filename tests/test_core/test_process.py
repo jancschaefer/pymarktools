@@ -11,7 +11,7 @@ from pymarktools.global_state import global_state
 def test_print_common_info_includes_fail(capsys, monkeypatch, tmp_path):
     monkeypatch.setitem(check_options, "fail", False)
     global_state["verbose"] = True
-    print_common_info(tmp_path)
+    print_common_info(tmp_path, check_options)
     captured = capsys.readouterr()
     assert "Fail on invalid items: False" in captured.out
     global_state["verbose"] = False
@@ -46,7 +46,7 @@ def test_process_path_and_check_valid(tmp_path, monkeypatch):
     result = [LinkInfo(text="ok", url="https://example.com", line_number=1, is_valid=True)]
     monkeypatch.setitem(check_options, "parallel", False)
     global_state["quiet"] = True
-    assert process_path_and_check(DummyLinkChecker(result), "links", file_path) is True
+    assert process_path_and_check(DummyLinkChecker(result), "links", file_path, check_options) is True
     global_state["quiet"] = False
 
 
@@ -56,5 +56,5 @@ def test_process_path_and_check_invalid(tmp_path, monkeypatch):
     result = [ImageInfo(alt_text="bad", url="x", line_number=1, is_valid=False)]
     monkeypatch.setitem(check_options, "parallel", False)
     global_state["quiet"] = True
-    assert process_path_and_check(DummyImageChecker(result), "images", file_path) is False
+    assert process_path_and_check(DummyImageChecker(result), "images", file_path, check_options) is False
     global_state["quiet"] = False

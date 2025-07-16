@@ -37,6 +37,6 @@ def test_echo_verbose(capsys):
 def test_echo_print_common_info(capsys, tmp_path):
     global_state.update({"verbose": True, "quiet": False, "color": False})
     check_options.update({"include_pattern": "*.md", "parallel": True, "output": None, "workers": None})
-    print_common_info(tmp_path)
+    print_common_info(tmp_path, check_options)
     captured = capsys.readouterr()
     assert "Checking in:" in captured.out

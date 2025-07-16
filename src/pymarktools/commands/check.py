@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 
 import typer
 
-from ..check_options import check_options
+from ..check_options import CheckOptions, check_options
 from ..core.image_checker import DeadImageChecker
 from ..core.link_checker import DeadLinkChecker
 from ..global_state import global_state
@@ -124,8 +124,8 @@ def check(
     if path is None:
         path = Path.cwd()
 
-    local_state: dict[str, Any] = check_options.copy()
-    local_state.update(
+    local_options: CheckOptions = check_options.copy()
+    local_options.update(
         {
             "timeout": timeout,
             "output": output,
@@ -143,32 +143,32 @@ def check(
         }
     )
 
-    if not local_state["check_dead_links"] and not local_state["check_dead_images"]:
+    if not local_options["check_dead_links"] and not local_options["check_dead_images"]:
         echo_error("Both checks disabled; nothing to do")
         raise typer.Exit(1)
 
-    check_options.update(local_state)
+    # Use local_options for this invocation without mutating the global defaults
 
     overall_valid = True
 
-    if local_state["check_dead_links"]:
+    if local_options["check_dead_links"]:
         echo_info("Checking for dead links...")
-        print_common_info(path)
+        print_common_info(path, local_options)
 
         link_checker = DeadLinkChecker(
-            timeout=check_options["timeout"],
-            check_external=check_options["check_external"],
-            check_local=check_options["check_local"],
-            fix_redirects=check_options["fix_redirects"],
-            follow_gitignore=check_options["follow_gitignore"],
-            parallel=check_options["parallel"],
-            workers=check_options["workers"],
+            timeout=local_options["timeout"],
+            check_external=local_options["check_external"],
+            check_local=local_options["check_local"],
+            fix_redirects=local_options["fix_redirects"],
+            follow_gitignore=local_options["follow_gitignore"],
+            parallel=local_options["parallel"],
+            workers=local_options["workers"],
         )
 
         try:
-            all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", path))
+            all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", path, local_options))
         except RuntimeError:
-            all_valid = process_path_and_check(link_checker, "links", path)
+            all_valid = process_path_and_check(link_checker, "links", path, local_options)
 
         overall_valid = overall_valid and all_valid
         if all_valid:
@@ -176,24 +176,24 @@ def check(
         else:
             echo_error("Some links are invalid or broken")
 
-    if local_state["check_dead_images"]:
+    if local_options["check_dead_images"]:
         echo_info("Checking for dead images...")
-        print_common_info(path)
+        print_common_info(path, local_options)
 
         image_checker = DeadImageChecker(
-            timeout=check_options["timeout"],
-            check_external=check_options["check_external"],
-            check_local=check_options["check_local"],
-            fix_redirects=check_options["fix_redirects"],
-            follow_gitignore=check_options["follow_gitignore"],
-            parallel=check_options["parallel"],
-            workers=check_options["workers"],
+            timeout=local_options["timeout"],
+            check_external=local_options["check_external"],
+            check_local=local_options["check_local"],
+            fix_redirects=local_options["fix_redirects"],
+            follow_gitignore=local_options["follow_gitignore"],
+            parallel=local_options["parallel"],
+            workers=local_options["workers"],
         )
 
         try:
-            all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", path))
+            all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", path, local_options))
         except RuntimeError:
-            all_valid = process_path_and_check(image_checker, "images", path)
+            all_valid = process_path_and_check(image_checker, "images", path, local_options)
 
         overall_valid = overall_valid and all_valid
         if all_valid:
@@ -201,41 +201,46 @@ def check(
         else:
             echo_error("Some images are invalid or broken")
 
-    if not overall_valid and check_options["fail"]:
+    if not overall_valid and local_options["fail"]:
         raise typer.Exit(1)
 
 
-def print_common_info(path: Path) -> None:
+def print_common_info(path: Path, options: CheckOptions) -> None:
     """Print common information about the check operation."""
     echo_if_verbose(f"Checking in: {path}")
-    echo_if_verbose(f"Using timeout: {check_options['timeout']}s")
-    echo_if_verbose(f"Checking external: {check_options['check_external']}")
-    echo_if_verbose(f"Checking local files: {check_options['check_local']}")
-    echo_if_verbose(f"Fixing redirects: {check_options['fix_redirects']}")
-    echo_if_verbose(f"Following gitignore: {check_options['follow_gitignore']}")
-    echo_if_verbose(f"Include pattern: {check_options['include_pattern']}")
-    if check_options["exclude_pattern"]:
-        echo_if_verbose(f"Exclude pattern: {check_options['exclude_pattern']}")
-    echo_if_verbose(f"Parallel processing: {check_options['parallel']}")
-    if check_options["workers"]:
-        echo_if_verbose(f"Worker threads: {check_options['workers']}")
+    echo_if_verbose(f"Using timeout: {options['timeout']}s")
+    echo_if_verbose(f"Checking external: {options['check_external']}")
+    echo_if_verbose(f"Checking local files: {options['check_local']}")
+    echo_if_verbose(f"Fixing redirects: {options['fix_redirects']}")
+    echo_if_verbose(f"Following gitignore: {options['follow_gitignore']}")
+    echo_if_verbose(f"Include pattern: {options['include_pattern']}")
+    if options["exclude_pattern"]:
+        echo_if_verbose(f"Exclude pattern: {options['exclude_pattern']}")
+    echo_if_verbose(f"Parallel processing: {options['parallel']}")
+    if options["workers"]:
+        echo_if_verbose(f"Worker threads: {options['workers']}")
     else:
         echo_if_verbose(f"Worker threads: {os.cpu_count()} (auto-detected)")
-    if check_options["output"]:
-        echo_if_verbose(f"Report will be saved to: {check_options['output']}")
-    echo_if_verbose(f"Fail on invalid items: {check_options['fail']}")
+    if options["output"]:
+        echo_if_verbose(f"Report will be saved to: {options['output']}")
+    echo_if_verbose(f"Fail on invalid items: {options['fail']}")
 
 
-def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], item_type: str, path: Path) -> bool:
+def process_path_and_check(
+    checker: Union[DeadLinkChecker, DeadImageChecker],
+    item_type: str,
+    path: Path,
+    options: CheckOptions,
+) -> bool:
     """Process the path and run the checker, displaying results.
 
     Returns:
         True if all items are valid, False if any invalid items are found.
     """
     # For directory processing with many files, use async for better performance and progress reporting
-    if path.is_dir() and check_options.get("parallel", True):
+    if path.is_dir() and options.get("parallel", True):
         try:
-            return asyncio.run(process_path_and_check_async(checker, item_type, path))
+            return asyncio.run(process_path_and_check_async(checker, item_type, path, options))
         except RuntimeError:
             # Already in an event loop, fall back to sync processing
             pass
@@ -254,8 +259,8 @@ def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], it
         elif path.is_dir():
             results = checker.check_directory(
                 path,
-                include_pattern=check_options["include_pattern"],
-                exclude_pattern=check_options["exclude_pattern"],
+                include_pattern=options["include_pattern"],
+                exclude_pattern=options["exclude_pattern"],
             )
             total_items: int = sum(len(items) for items in results.values())
             echo_if_not_quiet(f"Found {total_items} {item_type} across {len(results)} files")
@@ -277,7 +282,10 @@ def process_path_and_check(checker: Union[DeadLinkChecker, DeadImageChecker], it
 
 
 async def process_path_and_check_async(
-    checker: Union[DeadLinkChecker, DeadImageChecker], item_type: str, path: Path
+    checker: Union[DeadLinkChecker, DeadImageChecker],
+    item_type: str,
+    path: Path,
+    options: CheckOptions,
 ) -> bool:
     """Process the path and run the checker asynchronously with progress reporting.
 
@@ -314,8 +322,8 @@ async def process_path_and_check_async(
             # Run async directory check with progress reporting
             results = await checker.check_directory_async(
                 path,
-                include_pattern=check_options["include_pattern"],
-                exclude_pattern=check_options["exclude_pattern"],
+                include_pattern=options["include_pattern"],
+                exclude_pattern=options["exclude_pattern"],
                 progress_callback=progress_callback if global_state.get("verbose", False) else None,
             )
 
