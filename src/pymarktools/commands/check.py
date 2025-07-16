@@ -8,6 +8,7 @@ from typing import Any
 import typer
 
 from ..check_options import CheckOptions, check_options
+from ..config import load_pyproject_config, merge_check_options
 from ..core.image_checker import DeadImageChecker
 from ..core.link_checker import DeadLinkChecker
 from ..global_state import global_state
@@ -123,27 +124,57 @@ def check(
     ),
 ) -> None:
     """Check markdown files for dead links and images."""
-    if path is None:
-        path = Path.cwd()
-
-    local_options: CheckOptions = check_options.copy()
-    local_options.update(
-        {
-            "timeout": timeout,
-            "output": output,
-            "check_external": check_external,
-            "check_local": check_local,
-            "fix_redirects": fix_redirects,
-            "follow_gitignore": follow_gitignore,
-            "include_pattern": include_pattern,
-            "exclude_pattern": exclude_pattern,
-            "parallel": parallel,
-            "fail": fail,
-            "workers": workers,
-            "check_dead_links": check_dead_links,
-            "check_dead_images": check_dead_images,
-        }
+    # Load configuration from pyproject.toml
+    pyproject_config = load_pyproject_config()
+    
+    # Determine if CLI args were explicitly provided by checking against defaults
+    cli_overrides = {}
+    
+    # Note: This approach assumes that if a value differs from the default, it was explicitly set
+    # This is not perfect but works for most cases with typer
+    if timeout != check_options["timeout"]:
+        cli_overrides["timeout"] = timeout
+    if output is not None:
+        cli_overrides["output"] = output
+    if check_external != check_options["check_external"]:
+        cli_overrides["check_external"] = check_external
+    if check_local != check_options["check_local"]:
+        cli_overrides["check_local"] = check_local
+    if fix_redirects != check_options["fix_redirects"]:
+        cli_overrides["fix_redirects"] = fix_redirects
+    if follow_gitignore != check_options["follow_gitignore"]:
+        cli_overrides["follow_gitignore"] = follow_gitignore
+    if include_pattern != check_options["include_pattern"]:
+        cli_overrides["include_pattern"] = include_pattern
+    if exclude_pattern != check_options["exclude_pattern"]:
+        cli_overrides["exclude_pattern"] = exclude_pattern
+    if parallel != check_options["parallel"]:
+        cli_overrides["parallel"] = parallel
+    if fail != check_options["fail"]:
+        cli_overrides["fail"] = fail
+    if workers != check_options["workers"]:
+        cli_overrides["workers"] = workers
+    if check_dead_links != check_options["check_dead_links"]:
+        cli_overrides["check_dead_links"] = check_dead_links
+    if check_dead_images != check_options["check_dead_images"]:
+        cli_overrides["check_dead_images"] = check_dead_images
+    
+    # Merge configuration from all sources
+    local_options, config_paths = merge_check_options(
+        check_options, pyproject_config, cli_overrides
     )
+    
+    # Handle paths: CLI argument takes precedence over config
+    paths_to_check = []
+    if path is not None:
+        # Explicit path argument provided
+        paths_to_check = [path]
+    elif config_paths:
+        # Use paths from configuration
+        paths_to_check = config_paths
+    else:
+        # Default to current directory
+        paths_to_check = [Path.cwd()]
 
     if not local_options["check_dead_links"] and not local_options["check_dead_images"]:
         echo_error("Both checks disabled; nothing to do")
@@ -153,55 +184,59 @@ def check(
 
     overall_valid = True
 
-    if local_options["check_dead_links"]:
-        echo_info("Checking for dead links...")
-        print_common_info(path, local_options)
+    # Process each path
+    for current_path in paths_to_check:
+        echo_if_verbose(f"Processing path: {current_path}")
 
-        link_checker = DeadLinkChecker(
-            timeout=local_options["timeout"],
-            check_external=local_options["check_external"],
-            check_local=local_options["check_local"],
-            fix_redirects=local_options["fix_redirects"],
-            follow_gitignore=local_options["follow_gitignore"],
-            parallel=local_options["parallel"],
-            workers=local_options["workers"],
-        )
+        if local_options["check_dead_links"]:
+            echo_info(f"Checking for dead links in {current_path}...")
+            print_common_info(current_path, local_options)
 
-        try:
-            all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", path, local_options))
-        except RuntimeError:
-            all_valid = process_path_and_check(link_checker, "links", path, local_options)
+            link_checker = DeadLinkChecker(
+                timeout=local_options["timeout"],
+                check_external=local_options["check_external"],
+                check_local=local_options["check_local"],
+                fix_redirects=local_options["fix_redirects"],
+                follow_gitignore=local_options["follow_gitignore"],
+                parallel=local_options["parallel"],
+                workers=local_options["workers"],
+            )
 
-        overall_valid = overall_valid and all_valid
-        if all_valid:
-            echo_success("All links are valid")
-        else:
-            echo_error("Some links are invalid or broken")
+            try:
+                all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", current_path, local_options))
+            except RuntimeError:
+                all_valid = process_path_and_check(link_checker, "links", current_path, local_options)
 
-    if local_options["check_dead_images"]:
-        echo_info("Checking for dead images...")
-        print_common_info(path, local_options)
+            overall_valid = overall_valid and all_valid
+            if all_valid:
+                echo_success(f"All links are valid in {current_path}")
+            else:
+                echo_error(f"Some links are invalid or broken in {current_path}")
 
-        image_checker = DeadImageChecker(
-            timeout=local_options["timeout"],
-            check_external=local_options["check_external"],
-            check_local=local_options["check_local"],
-            fix_redirects=local_options["fix_redirects"],
-            follow_gitignore=local_options["follow_gitignore"],
-            parallel=local_options["parallel"],
-            workers=local_options["workers"],
-        )
+        if local_options["check_dead_images"]:
+            echo_info(f"Checking for dead images in {current_path}...")
+            print_common_info(current_path, local_options)
 
-        try:
-            all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", path, local_options))
-        except RuntimeError:
-            all_valid = process_path_and_check(image_checker, "images", path, local_options)
+            image_checker = DeadImageChecker(
+                timeout=local_options["timeout"],
+                check_external=local_options["check_external"],
+                check_local=local_options["check_local"],
+                fix_redirects=local_options["fix_redirects"],
+                follow_gitignore=local_options["follow_gitignore"],
+                parallel=local_options["parallel"],
+                workers=local_options["workers"],
+            )
 
-        overall_valid = overall_valid and all_valid
-        if all_valid:
-            echo_success("All images are valid")
-        else:
-            echo_error("Some images are invalid or broken")
+            try:
+                all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", current_path, local_options))
+            except RuntimeError:
+                all_valid = process_path_and_check(image_checker, "images", current_path, local_options)
+
+            overall_valid = overall_valid and all_valid
+            if all_valid:
+                echo_success(f"All images are valid in {current_path}")
+            else:
+                echo_error(f"Some images are invalid or broken in {current_path}")
 
     if not overall_valid and local_options["fail"]:
         raise typer.Exit(1)
