@@ -6,7 +6,7 @@ authors = [
     {name = 'Jan Schäfer', email = 'jan@schae.fr'},
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 
 classifiers = [
     "Development Status :: 4 - Beta",
