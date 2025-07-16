@@ -1,6 +1,6 @@
 [project]
 name = "pymarktools"
-version = "0.2.0"
+version = "0.3.0"
 description = "A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing."
 authors = [
     {name = 'Jan Schäfer', email = 'jan@schae.fr'},

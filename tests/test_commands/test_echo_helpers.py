@@ -1,5 +1,4 @@
 from pymarktools.commands.check import (
-    check_state,
     echo_error,
     echo_if_not_quiet,
     echo_if_verbose,
@@ -8,7 +7,7 @@ from pymarktools.commands.check import (
     echo_warning,
     print_common_info,
 )
-from pymarktools.state import global_state
+from pymarktools.state import check_options, global_state
 
 
 def test_echo_functions(capsys):
@@ -36,7 +35,7 @@ def test_echo_verbose(capsys):
 
 def test_echo_print_common_info(capsys, tmp_path):
     global_state.update({"verbose": True, "quiet": False, "color": False})
-    check_state.update({"include_pattern": "*.md", "parallel": True, "output": None, "workers": None})
+    check_options.update({"include_pattern": "*.md", "parallel": True, "output": None, "workers": None})
     print_common_info(tmp_path)
     captured = capsys.readouterr()
     assert "Checking in:" in captured.out

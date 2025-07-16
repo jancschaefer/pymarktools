@@ -6,6 +6,15 @@
 
 - `--fail/--no-fail` option for all `check` commands to control exit behavior.
 
+## [0.3.0] - 2025-07-16
+
+### Changed
+
+- Replaced `check dead-links` and `check dead-images` subcommands with a unified
+  `check` command. Use `--no-check-dead-images` or `--no-check-dead-links` to
+  disable specific validations.
+- Bumped version to `0.3.0` due to breaking CLI changes.
+
 ## [0.2.0] - 2025-07-08
 
 ### [0.2.0] - Added
