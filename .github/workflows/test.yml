@@ -36,6 +36,8 @@ jobs:
       run: uv run ruff check src/pymarktools tests
     - name: Run formatter check
       run: uv run ruff format --check src/pymarktools tests
+    - name: Run markdown formatter check
+      run: uv run mdformat --check .
     - name: Run tests
       run: uv run pytest --cov=src/pymarktools --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
     - name: Upload coverage to Codecov

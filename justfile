@@ -9,7 +9,7 @@ install:
     uv sync --all-extras --dev
 
 # Run all quality checks (matches CI)
-check: type-check lint format-check test
+check: type-check lint format-check mdformat-check test
 
 # Run type checker
 type-check:
@@ -28,8 +28,16 @@ format-check:
     uv run ruff format --check src/pymarktools tests
 
 # Format code
-format:
+format: mdformat
     uv run ruff format src/pymarktools tests
+
+# Check markdown formatting
+mdformat-check:
+    uv run mdformat --check .
+
+# Format markdown files
+mdformat:
+    uv run mdformat .
 
 # Run tests
 test:
