@@ -47,7 +47,6 @@ repos:
       - mdformat-gfm-alerts
       - mdformat-tables
       - mdformat-toc
-      - mdformat-shfmt
 
   # Additional useful hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks

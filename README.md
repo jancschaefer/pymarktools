@@ -26,7 +26,6 @@ easy development and testing.
 
 ### Workflow
 
-- **Command line interface** with flexible option placement and callbacks
 - **Optional fail behavior** with `--fail/--no-fail` to control exit codes
 - **Gitignore integration** respecting `.gitignore` patterns
 - **File refactoring** capabilities to move files and update references
@@ -117,8 +116,7 @@ uv run just test
 
 ## Usage
 
-After installation, you can use the command line interface to access the markdown utilities. The CLI supports flexible
-option placement and both global and command-specific options.
+After installation, you can use the command line interface to access the markdown utilities.
 
 ### Basic Usage
 
@@ -156,25 +154,6 @@ pymarktools check --no-check-dead-links <path>
 
 # Check with pattern filtering
 pymarktools check --no-check-dead-links docs/ --include "*.md" --exclude "draft_*"
-```
-
-### Flexible Option Placement
-
-> [!TIP]
-> **Maximum Flexibility:** Options can be specified at the callback level (applying to all subcommands) or at the
-> individual command level for maximum flexibility.
-
-Options can be specified at the callback level (applying to all subcommands) or at the individual command level:
-
-```bash
-# Options at callback level (apply to all check commands)
-pymarktools check --timeout 30 --no-check-external --no-check-dead-images file.md
-
-# Options at command level (override callback settings)
-pymarktools check --no-check-dead-images file.md --timeout 10 --check-external
-
-# Mixed approach (command options override callback when both specified)
-pymarktools check --include "*.md" --no-check-dead-images --timeout 60 docs/
 ```
 
 ### Local File Validation
