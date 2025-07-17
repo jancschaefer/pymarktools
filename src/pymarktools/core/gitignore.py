@@ -43,7 +43,7 @@ def get_gitignore_matcher(base_dir: Path) -> Callable[[str], bool]:
     dirs_to_check: list[Path] = []
     while current_dir != repo_root.parent:  # Stop after including repo_root
         dirs_to_check.append(current_dir)
-        if current_dir == repo_root:
+        if current_dir == repo_root or current_dir == current_dir.parent:
             break
         current_dir = current_dir.parent
 

@@ -110,14 +110,14 @@ Line 3 with ![second image](https://test.com/2.png)"""
 
     def test_init_with_custom_params(self):
         checker = DeadImageChecker(
-            timeout=60,
+            timeout=5,
             check_external=False,
             check_local=False,
             fix_redirects=True,
             follow_gitignore=False,
         )
 
-        assert checker.timeout == 60
+        assert checker.timeout == 5
         assert checker.check_external is False
         assert checker.check_local is False
         assert checker.fix_redirects is True

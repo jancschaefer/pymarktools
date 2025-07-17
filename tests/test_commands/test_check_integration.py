@@ -42,7 +42,7 @@ def temp_project_with_config():
         # Create pyproject.toml
         pyproject_content = """[tool.pymarktools]
 paths = ["docs"]
-timeout = 45
+timeout = 3
 check_external = false
 parallel = false
 fail = false
@@ -74,7 +74,7 @@ class TestCheckCommandIntegration:
 
         # Should use configuration values
         assert result.exit_code == 0  # fail = false in config
-        assert "timeout: 45s" in result.stdout  # Custom timeout from config
+        assert "timeout: 3s" in result.stdout  # Custom timeout from config
         assert "Checking external: False" in result.stdout  # check_external = false
         assert "Parallel processing: False" in result.stdout  # parallel = false
         assert "docs/test.md" in result.stdout  # Should check the docs directory
@@ -83,10 +83,10 @@ class TestCheckCommandIntegration:
         """Test that CLI arguments override pyproject.toml values."""
         # Override timeout with CLI argument
         with change_dir(temp_project_with_config):
-            result = runner.invoke(app, ["check", "--timeout", "15", "--check-external"])
+            result = runner.invoke(app, ["check", "--timeout", "2", "--check-external"])
 
         # Should use CLI values instead of config
-        assert "timeout: 15s" in result.stdout  # CLI override
+        assert "timeout: 2s" in result.stdout  # CLI override
         assert "Checking external: True" in result.stdout  # CLI override
         assert "Parallel processing: False" in result.stdout  # Still from config
 

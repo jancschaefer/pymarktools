@@ -15,7 +15,7 @@ def temp_pyproject():
     """Create a temporary pyproject.toml file."""
     content = """[tool.pymarktools]
 paths = ["src", "docs"]
-timeout = 60
+timeout = 5
 check_external = false
 check_local = true
 include_pattern = "*.md"
@@ -44,7 +44,7 @@ def temp_directory_with_pyproject():
 
         content = """[tool.pymarktools]
 paths = [".", "tests"]
-timeout = 45
+timeout = 3
 check_external = true
 parallel = true
 """
@@ -110,7 +110,7 @@ class TestLoadPyprojectConfig:
         try:
             config = load_pyproject_config(pyproject_path)
 
-            assert config["timeout"] == 60
+            assert config["timeout"] == 5
             assert config["check_external"] is False
             assert config["check_local"] is True
             assert config["paths"] == ["src", "docs"]
@@ -174,14 +174,14 @@ class TestMergeCheckOptions:
     def test_merge_with_pyproject_config(self):
         """Test merging options with pyproject.toml configuration."""
         pyproject_config = {
-            "timeout": 60,
+            "timeout": 5,
             "check_external": False,
             "paths": ["src", "docs"],
         }
 
         merged_options, paths = merge_check_options(check_options, pyproject_config, {})
 
-        assert merged_options["timeout"] == 60
+        assert merged_options["timeout"] == 5
         assert merged_options["check_external"] is False
         assert merged_options["check_local"] is True  # Default preserved
         assert paths == [Path("src"), Path("docs")]
@@ -189,17 +189,17 @@ class TestMergeCheckOptions:
     def test_merge_with_cli_overrides(self):
         """Test that CLI overrides take precedence."""
         pyproject_config = {
-            "timeout": 60,
+            "timeout": 5,
             "check_external": False,
         }
         cli_overrides = {
-            "timeout": 120,
+            "timeout": 8,
             "parallel": False,
         }
 
         merged_options, paths = merge_check_options(check_options, pyproject_config, cli_overrides)
 
-        assert merged_options["timeout"] == 120  # CLI override
+        assert merged_options["timeout"] == 8  # CLI override
         assert merged_options["check_external"] is False  # From pyproject
         assert merged_options["parallel"] is False  # CLI override
         assert merged_options["check_local"] is True  # Default preserved
@@ -262,13 +262,13 @@ class TestMergeCheckOptions:
     def test_merge_ignore_unknown_options(self):
         """Test that unknown options are ignored."""
         pyproject_config = {
-            "timeout": 60,
+            "timeout": 4,
             "unknown_option": "value",
             "another_unknown": True,
         }
 
         merged_options, paths = merge_check_options(check_options, pyproject_config, {})
 
-        assert merged_options["timeout"] == 60
+        assert merged_options["timeout"] == 4
         assert "unknown_option" not in merged_options
         assert "another_unknown" not in merged_options
