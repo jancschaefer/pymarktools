@@ -33,22 +33,22 @@ output = "link_report.txt"
 
 All command-line options for the `check` command can be configured in `pyproject.toml`:
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `paths` | array of strings | Directories or files to check |
-| `timeout` | integer | Request timeout in seconds |
-| `output` | string | Output file for the report |
-| `check_external` | boolean | Check external URLs with HTTP requests |
-| `check_local` | boolean | Check if local file links/images exist |
-| `fix_redirects` | boolean | Update links with permanent redirects |
-| `follow_gitignore` | boolean | Respect .gitignore patterns |
-| `include_pattern` | string | File pattern to include |
-| `exclude_pattern` | string | File pattern to exclude |
-| `parallel` | boolean | Enable parallel processing |
-| `fail` | boolean | Exit with status 1 if invalid items found |
-| `workers` | integer | Number of worker threads |
-| `check_dead_links` | boolean | Validate links |
-| `check_dead_images` | boolean | Validate images |
+| Option              | Type             | Description                               |
+| ------------------- | ---------------- | ----------------------------------------- |
+| `paths`             | array of strings | Directories or files to check             |
+| `timeout`           | integer          | Request timeout in seconds                |
+| `output`            | string           | Output file for the report                |
+| `check_external`    | boolean          | Check external URLs with HTTP requests    |
+| `check_local`       | boolean          | Check if local file links/images exist    |
+| `fix_redirects`     | boolean          | Update links with permanent redirects     |
+| `follow_gitignore`  | boolean          | Respect .gitignore patterns               |
+| `include_pattern`   | string           | File pattern to include                   |
+| `exclude_pattern`   | string           | File pattern to exclude                   |
+| `parallel`          | boolean          | Enable parallel processing                |
+| `fail`              | boolean          | Exit with status 1 if invalid items found |
+| `workers`           | integer          | Number of worker threads                  |
+| `check_dead_links`  | boolean          | Validate links                            |
+| `check_dead_images` | boolean          | Validate images                           |
 
 ## Configuration Discovery
 
@@ -59,8 +59,8 @@ pymarktools automatically searches for `pyproject.toml` by walking up the direct
 Configuration values are applied in the following order (highest priority first):
 
 1. **Command-line arguments** - Explicit CLI flags and options
-2. **pyproject.toml configuration** - Values from `[tool.pymarktools]` section
-3. **Default values** - Built-in defaults
+1. **pyproject.toml configuration** - Values from `[tool.pymarktools]` section
+1. **Default values** - Built-in defaults
 
 ## Examples
 

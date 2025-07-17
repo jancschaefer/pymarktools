@@ -71,6 +71,7 @@ dev = [
     "pytest-cov>=6.2.1",
     "pytest-xdist>=3.8.0",
     "ruff>=0.12.2",
+    "rust-just>=1.42.2",
     "ty>=0.0.1a13",
 ]
 

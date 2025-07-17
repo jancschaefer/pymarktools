@@ -2,7 +2,15 @@
 
 ## [unreleased]
 
+### Added
+
+- Pre-commit hooks for automated code quality checks (linting, formatting, type checking)
+- Pre-commit configuration with hooks matching CI pipeline checks
+- Justfile with development tasks for quality checks, testing, and building
+- Documentation for pre-commit setup and usage
+
 ### Changed
+
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
 
 ## [0.3.0] - 2025-07-16

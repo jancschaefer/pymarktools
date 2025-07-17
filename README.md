@@ -7,8 +7,6 @@
 ![Codecov](https://img.shields.io/codecov/c/github/jancschaefer/pymarktools)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjancschaefer%2Fpymarktools%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
 
-
-
 A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing.
 
 ## Features
@@ -72,6 +70,32 @@ For development or contributing:
 git clone https://github.com/yourusername/pymarktools.git
 cd pymarktools
 uv install -e .
+
+# Install pre-commit hooks for code quality
+uv run pre-commit install
+
+# Or use the justfile to set up everything
+uv run just setup
+```
+
+This will install [pre-commit hooks](docs/pre-commit.md) that automatically run quality checks (linting, formatting, type checking) before each commit, ensuring your contributions meet the project's standards.
+
+### Development Tasks
+
+The project includes a `justfile` for common development tasks:
+
+```bash
+# Show available tasks
+uv run just
+
+# Run all quality checks (same as CI)
+uv run just check
+
+# Run individual tasks
+uv run just lint
+uv run just format
+uv run just type-check
+uv run just test
 ```
 
 ## Usage
@@ -391,9 +415,10 @@ pymarktools check specific-file.md
 ```
 
 **Priority order** (highest to lowest):
+
 1. Command-line arguments
-2. pyproject.toml configuration
-3. Built-in defaults
+1. pyproject.toml configuration
+1. Built-in defaults
 
 For complete configuration reference, see [docs/pyproject-config.md](docs/pyproject-config.md).
 

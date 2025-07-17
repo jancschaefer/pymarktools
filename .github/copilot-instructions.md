@@ -2,6 +2,7 @@
 
 pymarktools is a Python library and CLI for validating and refactoring markdown files with link and image handling.
 For contribution workflow and style guidance, see `AGENTS.md` in the project root.
+
 ## Style Guide
 
 - Target Python 3.13 with type hints on all public APIs.

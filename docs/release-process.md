@@ -38,7 +38,6 @@ Production releases to PyPI happen when you create a GitHub release.
 
 ### Step 1: Prepare the Release
 
-
 1. **Update the changelog** in `CHANGELOG.md`:
 
     - Add a new section for the release version and date
