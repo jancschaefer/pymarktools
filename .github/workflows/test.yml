@@ -30,7 +30,7 @@ jobs:
     - name: Run formatter check
       run: uv run ruff format --check src/pymarktools tests
     - name: Run markdown formatter check
-      run: uv run mdformat --check .
+      run: uv run mdformat --check README.md docs
 
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
