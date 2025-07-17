@@ -68,8 +68,8 @@ def check(
     path: Path | None = typer.Argument(None, help="Path to markdown file or directory (defaults to current directory)"),
     timeout: int = typer.Option(check_options["timeout"], "--timeout", "-t", help="Request timeout in seconds"),
     output: Path | None = typer.Option(None, "--output", "-o", help="Output file for the report"),
-    check_external: bool = typer.Option(
-        check_options["check_external"],
+    check_external: bool | None = typer.Option(
+        None,
         "--check-external/--no-check-external",
         help="Whether to check external links/images with HTTP requests",
     ),
@@ -136,7 +136,7 @@ def check(
         cli_overrides["timeout"] = timeout
     if output is not None:
         cli_overrides["output"] = output
-    if check_external != check_options["check_external"]:
+    if check_external is not None:
         cli_overrides["check_external"] = check_external
     if check_local != check_options["check_local"]:
         cli_overrides["check_local"] = check_local

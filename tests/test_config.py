@@ -63,7 +63,8 @@ class TestFindPyprojectToml:
         # Change to the temp directory
         with patch("pathlib.Path.cwd", return_value=temp_path):
             found_path = find_pyproject_toml()
-            assert found_path == pyproject_path
+            assert found_path is not None
+            assert found_path.resolve() == pyproject_path.resolve()
 
     def test_find_pyproject_in_parent_directory(self, temp_directory_with_pyproject):
         """Test finding pyproject.toml in a parent directory."""
@@ -75,7 +76,8 @@ class TestFindPyprojectToml:
 
         # Search from subdirectory should find parent's pyproject.toml
         found_path = find_pyproject_toml(subdir)
-        assert found_path == pyproject_path
+        assert found_path is not None
+        assert found_path.resolve() == pyproject_path.resolve()
 
     def test_find_pyproject_not_found(self):
         """Test when pyproject.toml is not found."""
@@ -92,7 +94,8 @@ class TestFindPyprojectToml:
 
         try:
             found_path = find_pyproject_toml(temp_pyproject.parent)
-            assert found_path == pyproject_path
+            assert found_path is not None
+            assert found_path.resolve() == pyproject_path.resolve()
         finally:
             if pyproject_path.exists():
                 pyproject_path.unlink()

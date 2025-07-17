@@ -70,7 +70,7 @@ class TestCheckCommandIntegration:
         """Test that check command loads and uses pyproject.toml configuration."""
         # Change to the project directory and run check without arguments
         with change_dir(temp_project_with_config):
-            result = runner.invoke(app, ["check"])
+            result = runner.invoke(app, ["--verbose", "check"])
 
         # Should use configuration values
         assert result.exit_code == 0  # fail = false in config
@@ -83,7 +83,7 @@ class TestCheckCommandIntegration:
         """Test that CLI arguments override pyproject.toml values."""
         # Override timeout with CLI argument
         with change_dir(temp_project_with_config):
-            result = runner.invoke(app, ["check", "--timeout", "2", "--check-external"])
+            result = runner.invoke(app, ["--verbose", "check", "--timeout", "2", "--check-external"])
 
         # Should use CLI values instead of config
         assert "timeout: 2s" in result.stdout  # CLI override
@@ -98,7 +98,7 @@ class TestCheckCommandIntegration:
 
         # Run with explicit path
         with change_dir(temp_project_with_config):
-            result = runner.invoke(app, ["check", str(other_file)])
+            result = runner.invoke(app, ["--verbose", "check", str(other_file)])
 
         # Should check the explicit file, not the paths from config
         assert "other.md" in result.stdout
@@ -114,7 +114,7 @@ class TestCheckCommandIntegration:
             md_file.write_text("# Test\n\nJust some text.")
 
             with change_dir(temp_path):
-                result = runner.invoke(app, ["check", str(md_file)])
+                result = runner.invoke(app, ["--verbose", "check", str(md_file)])
 
             # Should use default values
             assert "timeout: 30s" in result.stdout  # Default timeout
