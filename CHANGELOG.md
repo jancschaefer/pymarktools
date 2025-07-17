@@ -2,6 +2,9 @@
 
 ## [unreleased]
 
+### Changed
+- Converted all docstrings to NumPy style and updated documentation linting configuration.
+
 ## [0.3.0] - 2025-07-16
 
 ### Added

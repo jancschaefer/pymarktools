@@ -126,10 +126,10 @@ def check(
     """Check markdown files for dead links and images."""
     # Load configuration from pyproject.toml
     pyproject_config = load_pyproject_config()
-    
+
     # Determine if CLI args were explicitly provided by checking against defaults
     cli_overrides = {}
-    
+
     # Note: This approach assumes that if a value differs from the default, it was explicitly set
     # This is not perfect but works for most cases with typer
     if timeout != check_options["timeout"]:
@@ -158,12 +158,10 @@ def check(
         cli_overrides["check_dead_links"] = check_dead_links
     if check_dead_images != check_options["check_dead_images"]:
         cli_overrides["check_dead_images"] = check_dead_images
-    
+
     # Merge configuration from all sources
-    local_options, config_paths = merge_check_options(
-        check_options, pyproject_config, cli_overrides
-    )
-    
+    local_options, config_paths = merge_check_options(check_options, pyproject_config, cli_overrides)
+
     # Handle paths: CLI argument takes precedence over config
     paths_to_check = []
     if path is not None:
@@ -203,7 +201,9 @@ def check(
             )
 
             try:
-                all_valid = asyncio.run(process_path_and_check_async(link_checker, "links", current_path, local_options))
+                all_valid = asyncio.run(
+                    process_path_and_check_async(link_checker, "links", current_path, local_options)
+                )
             except RuntimeError:
                 all_valid = process_path_and_check(link_checker, "links", current_path, local_options)
 
@@ -228,7 +228,9 @@ def check(
             )
 
             try:
-                all_valid = asyncio.run(process_path_and_check_async(image_checker, "images", current_path, local_options))
+                all_valid = asyncio.run(
+                    process_path_and_check_async(image_checker, "images", current_path, local_options)
+                )
             except RuntimeError:
                 all_valid = process_path_and_check(image_checker, "images", current_path, local_options)
 
@@ -269,10 +271,12 @@ def process_path_and_check(
     path: Path,
     options: CheckOptions,
 ) -> bool:
-    """Process the path and run the checker, displaying results.
+    """Process ``path`` with ``checker`` and display results.
 
-    Returns:
-        True if all items are valid, False if any invalid items are found.
+    Returns
+    -------
+    bool
+        ``True`` if all items are valid, otherwise ``False``.
     """
     # For directory processing with many files, use async for better performance and progress reporting
     if path.is_dir() and options.get("parallel", True):
@@ -324,10 +328,12 @@ async def process_path_and_check_async(
     path: Path,
     options: CheckOptions,
 ) -> bool:
-    """Process the path and run the checker asynchronously with progress reporting.
+    """Process ``path`` asynchronously with progress reporting.
 
-    Returns:
-        True if all items are valid, False if any invalid items are found.
+    Returns
+    -------
+    bool
+        ``True`` if all items are valid, otherwise ``False``.
     """
     has_invalid_items: bool = False
 
