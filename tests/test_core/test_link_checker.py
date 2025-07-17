@@ -106,7 +106,8 @@ Line 3 with [another link](https://test.com)"""
         # Local links will fail since the files don't exist, but that's expected
         external_links = [link for link in links if link.is_local is False]
         assert all(link.is_valid for link in external_links)
-        assert all(link.status_code == 200 for link in external_links)
+        # When external checking is disabled, status_code should be 000 (not checked)
+        assert all(link.status_code == 000 for link in external_links)
 
     def test_init_with_custom_params(self):
         checker = DeadLinkChecker(
