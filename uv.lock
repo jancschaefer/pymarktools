@@ -339,6 +339,7 @@ dev = [
     { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "rust-just" },
+    { name = "setuptools" },
     { name = "ty" },
 ]
 
@@ -358,6 +359,7 @@ dev = [
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "ruff", specifier = ">=0.12.2" },
     { name = "rust-just", specifier = ">=1.42.2" },
+    { name = "setuptools", specifier = ">=80.9.0" },
     { name = "ty", specifier = ">=0.0.1a13" },
 ]
 
@@ -488,6 +490,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/80/67/1e44c98ac9f16f8ac2c96bfa8b7d518af5f39793ae87d6dd7f719e0522fe/rust_just-1.42.2-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:8f673befae686142806f414fe61e10a1ef17aba9c2f7776a4e2f239c34721cd7", size = 1845998 },
     { url = "https://files.pythonhosted.org/packages/5d/3d/167f65817b009361c738682558ddff5661cc9a85a2d6bdcd16add01d2e66/rust_just-1.42.2-py3-none-win32.whl", hash = "sha256:6d8a114654ba4182ede0d7d30223100909ff8d87f9e18b116992ae56b12cfea3", size = 1593132 },
     { url = "https://files.pythonhosted.org/packages/71/21/4eb5f8d0a7bd9c01b70bb36bc2e8697a756504af0d9ddd8d8e5b8c65b49f/rust_just-1.42.2-py3-none-win_amd64.whl", hash = "sha256:5b58ee52e65a37cb861678ea1223578165ba362b03cfabe426f0d4b724da10dc", size = 1735735 },
+]
+
+[[package]]
+name = "setuptools"
+version = "80.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c", size = 1319958 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922", size = 1201486 },
 ]
 
 [[package]]

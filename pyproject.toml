@@ -72,6 +72,7 @@ dev = [
     "pytest-xdist>=3.8.0",
     "ruff>=0.12.2",
     "rust-just>=1.42.2",
+    "setuptools>=80.9.0",
     "ty>=0.0.1a13",
 ]
 
@@ -110,3 +111,6 @@ pydocstyle = { convention = 'numpy' }
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/**/*.py" = ['T', 'E721', 'F811']
+
+[tool.mdformat]
+wrap = 120

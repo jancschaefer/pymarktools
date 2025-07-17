@@ -34,6 +34,21 @@ repos:
         always_run: true
         stages: [manual]  # Only run when explicitly requested
 
+  # Markdown formatting with mdformat
+  - repo: https://github.com/hukkin/mdformat
+    rev: 0.7.22  # Use the ref you want to point at
+    hooks:
+    - id: mdformat
+      # Optionally add plugins
+      additional_dependencies:
+      - mdformat-gfm
+      - mdformat-ruff
+      - mdformat-config
+      - mdformat-gfm-alerts
+      - mdformat-tables
+      - mdformat-toc
+      - mdformat-shfmt
+
   # Additional useful hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

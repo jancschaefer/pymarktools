@@ -1,7 +1,8 @@
 # AGENTS.md for pymarktools
 
-This guide provides instructions for OpenAI Codex and similar AI agents when working with this repository.
-pymarktools is a Python library that helps validate and refactor markdown files by checking links and images and providing CLI tools.
+This guide provides instructions for OpenAI Codex and similar AI agents when working with this repository. pymarktools
+is a Python library that helps validate and refactor markdown files by checking links and images and providing CLI
+tools.
 
 ## Project Structure
 
@@ -20,13 +21,14 @@ pymarktools is a Python library that helps validate and refactor markdown files 
 ## Development Workflow
 
 1. Run commands through `uv`:
-    - `uv run ty check` – type checking.
-    - `uv run ruff check src/pymarktools tests --fix` – lint and auto-fix issues.
-    - `uv run ruff format --check src/pymarktools tests` – ensure formatting.
-    - `uv run pytest` – run the full test suite.
-    - `uv run pytest --cov=src/pymarktools --cov-fail-under=80` – run tests with
-        coverage and fail if coverage drops below 80%.
-1. When adding, changing, or removing features, update `CHANGELOG.md` using the existing structure (e.g. `[unreleased]`, `Added`, `Changed`, etc.).
+   - `uv run ty check` – type checking.
+   - `uv run ruff check src/pymarktools tests --fix` – lint and auto-fix issues.
+   - `uv run ruff format --check src/pymarktools tests` – ensure formatting.
+   - `uv run pytest` – run the full test suite.
+   - `uv run pytest --cov=src/pymarktools --cov-fail-under=80` – run tests with coverage and fail if coverage drops
+     below 80%.
+1. When adding, changing, or removing features, update `CHANGELOG.md` using the existing structure (e.g. `[unreleased]`,
+   `Added`, `Changed`, etc.).
 1. Tests should live in the `tests/` directory and mock external network calls.
 1. Use `uv run python` for all script execution.
 

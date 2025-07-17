@@ -41,26 +41,26 @@ Production releases to PyPI happen when you create a GitHub release.
 
 1. **Update the changelog** in `CHANGELOG.md`:
 
-    - Add a new section for the release version and date
-    - Summarize all user-facing changes, fixes, and improvements
+   - Add a new section for the release version and date
+   - Summarize all user-facing changes, fixes, and improvements
 
 1. **Update the version** in `pyproject.toml`:
 
-    ```toml
-    [project]
-    name = "pymarktools"
-    version = "0.2.0"  # Update this
-    ```
+   ```toml
+   [project]
+   name = "pymarktools"
+   version = "0.2.0"    # Update this
+   ```
 
 1. **Update documentation** if needed (README.md, CHANGELOG.md, etc.)
 
 1. **Commit and push** changes:
 
-    ```bash
-    git add pyproject.toml
-    git commit -m "chore: bump version to 0.2.0"
-    git push origin main
-    ```
+   ```bash
+   git add pyproject.toml
+   git commit -m "chore: bump version to 0.2.0"
+   git push origin main
+   ```
 
 1. **Wait for CI** to pass on the main branch
 
@@ -157,15 +157,15 @@ If a release needs to be rolled back:
 
 1. **Immediate action**: Yank the problematic release on PyPI
 
-    - Go to [PyPI project page](https://pypi.org/project/pymarktools/)
-    - Select the problematic version
-    - Click "Options" → "Yank release"
+   - Go to [PyPI project page](https://pypi.org/project/pymarktools/)
+   - Select the problematic version
+   - Click "Options" → "Yank release"
 
 1. **Fix and re-release**:
 
-    - Fix the issue in code
-    - Bump the version (e.g., 0.2.0 → 0.2.1) in `pyproject.toml` and `src/pymarktools/__init__.py`
-    - Follow the normal release process
+   - Fix the issue in code
+   - Bump the version (e.g., 0.2.0 → 0.2.1) in `pyproject.toml` and `src/pymarktools/__init__.py`
+   - Follow the normal release process
 
 ## Troubleshooting
 
@@ -173,20 +173,20 @@ If a release needs to be rolled back:
 
 1. **"Permission denied" on PyPI**
 
-    - Verify OIDC trusted publisher is correctly configured
-    - Check that workflow name matches: `publish.yml`
-    - Verify environment name matches: `pypi`
+   - Verify OIDC trusted publisher is correctly configured
+   - Check that workflow name matches: `publish.yml`
+   - Verify environment name matches: `pypi`
 
 1. **Build failures**
 
-    - Check that all tests pass locally: `uv run pytest`
-    - Verify dependencies are correctly specified in `pyproject.toml`
-    - Run local build test: `uv tool run build`
+   - Check that all tests pass locally: `uv run pytest`
+   - Verify dependencies are correctly specified in `pyproject.toml`
+   - Run local build test: `uv tool run build`
 
 1. **Version conflicts**
 
-    - Ensure version in `pyproject.toml` matches the git tag
-    - Check that the version doesn't already exist on PyPI
+   - Ensure version in `pyproject.toml` matches the git tag
+   - Check that the version doesn't already exist on PyPI
 
 ### Getting Help
 
@@ -214,6 +214,6 @@ Use this checklist for each release:
 - [ ] Package available on PyPI
 - [ ] Installation and basic functionality tested
 
----
+______________________________________________________________________
 
 For questions about the release process, please open an issue or contact the maintainers.

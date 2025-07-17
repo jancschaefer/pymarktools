@@ -103,8 +103,3 @@ fail = true
 workers = 8
 output = "link-check-report.txt"
 ```
-
-## Note
-
-This implementation uses the `[tool.pymarktools]` section for consistency with the package name. If you see references
-to `[tool.pymarkdocs]` in issues or documentation, please use `[tool.pymarktools]` instead.

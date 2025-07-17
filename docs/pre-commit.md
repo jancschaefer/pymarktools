@@ -26,12 +26,12 @@ The following hooks run on every commit:
 1. **Ruff Formatter** - Ensures consistent code formatting
 1. **Type Checker (ty)** - Validates type annotations
 1. **Standard hooks**:
-    - Trim trailing whitespace
-    - Fix end of files
-    - Check YAML/TOML syntax
-    - Check for merge conflicts
-    - Check for large files
-    - Fix mixed line endings
+   - Trim trailing whitespace
+   - Fix end of files
+   - Check YAML/TOML syntax
+   - Check for merge conflicts
+   - Check for large files
+   - Fix mixed line endings
 
 ## Manual Execution
 
