@@ -169,10 +169,10 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
                     image.updated = True
                     updated = True
         else:
-            # External images but not checking - mark as valid
+            # External images but not checking - mark as unchecked
             for image in external_images:
-                image.is_valid = True
-                image.status_code = 200
+                image.is_valid = None
+                image.status_code = None
 
         # Process local images sequentially (file I/O is typically fast and doesn't benefit much from parallelization)
         for image in local_images:

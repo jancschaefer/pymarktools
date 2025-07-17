@@ -42,7 +42,7 @@ All command-line options for the `check` command can be configured in `pyproject
 | `paths`             | array of strings | Directories or files to check             |
 | `timeout`           | integer          | Request timeout in seconds                |
 | `output`            | string           | Output file for the report                |
-| `check_external`    | boolean          | Check external URLs with HTTP requests    |
+| `check_external`    | boolean          | Check external URLs with HTTP requests (false shows `UNCHECKED`) |
 | `check_local`       | boolean          | Check if local file links/images exist    |
 | `fix_redirects`     | boolean          | Update links with permanent redirects     |
 | `follow_gitignore`  | boolean          | Respect .gitignore patterns               |

@@ -102,11 +102,10 @@ Line 3 with ![second image](https://test.com/2.png)"""
 
         images = checker.check_file(temp_markdown_file)
 
-        # External images should be marked as valid (not checked)
-        # Local images will fail since the files don't exist, but that's expected
+        # External images should be marked as unchecked
         external_images = [image for image in images if image.is_local is False]
-        assert all(image.is_valid for image in external_images)
-        assert all(image.status_code == 200 for image in external_images)
+        assert all(image.is_valid is None for image in external_images)
+        assert all(image.status_code is None for image in external_images)
 
     def test_init_with_custom_params(self):
         checker = DeadImageChecker(
@@ -185,9 +184,9 @@ Line 3 with ![second image](https://test.com/2.png)"""
 
             assert len(images) == 3
 
-            # External image should be valid (not checked)
+            # External image should be marked as unchecked
             external_image = [image for image in images if image.url == "https://example.com/image.jpg"][0]
-            assert external_image.is_valid is True
+            assert external_image.is_valid is None
             assert external_image.is_local is False
 
             # Existing local file should be valid
@@ -217,8 +216,12 @@ Line 3 with ![second image](https://test.com/2.png)"""
 
             images = checker.check_file(md_file)
 
-            # All images should be marked as valid when checking is disabled
-            assert all(image.is_valid for image in images)
+            # External images remain unchecked when both checks are disabled
+            external_images = [img for img in images if img.is_local is False]
+            assert all(img.is_valid is None for img in external_images)
+            # Local images are considered valid when local checking is disabled
+            local_images = [img for img in images if img.is_local]
+            assert all(img.is_valid for img in local_images)
 
             # Local images should be marked as local
             local_image = [image for image in images if image.url == "missing.png"][0]

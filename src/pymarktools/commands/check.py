@@ -295,7 +295,7 @@ def process_path_and_check(
             echo_if_not_quiet(f"Found {len(items)} {item_type}")
             for item in items:
                 display_item_result(item, item_type)
-                if not item.is_valid:
+                if item.is_valid is False:
                     has_invalid_items = True
         elif path.is_dir():
             results = checker.check_directory(
@@ -310,7 +310,7 @@ def process_path_and_check(
                     echo_if_not_quiet(f"\n{file_path}: Found {len(items)} {item_type}")
                 for item in items:
                     display_item_result(item, item_type)
-                    if not item.is_valid:
+                    if item.is_valid is False:
                         has_invalid_items = True
         else:
             echo_error(f"Error: {path} is not a valid file or directory")
@@ -343,7 +343,7 @@ async def process_path_and_check_async(
             echo_if_not_quiet(f"Found {len(items)} {item_type}")
             for item in items:
                 display_item_result(item, item_type)
-                if not item.is_valid:
+                if item.is_valid is False:
                     has_invalid_items = True
         elif path.is_dir():
             # Progress callback for real-time updates
@@ -359,7 +359,7 @@ async def process_path_and_check_async(
                 # Display results for this file immediately
                 for item in items:
                     display_item_result(item, item_type)
-                    if not item.is_valid:
+                    if item.is_valid is False:
                         has_invalid_items_ref[0] = True
 
             # Run async directory check with progress reporting
@@ -383,7 +383,7 @@ async def process_path_and_check_async(
                         echo_if_not_quiet(f"\n{file_path}: Found {len(items)} {item_type}")
                     for item in items:
                         display_item_result(item, item_type)
-                        if not item.is_valid:
+                        if item.is_valid is False:
                             has_invalid_items = True
         else:
             echo_error(f"Error: {path} is not a valid file or directory")
@@ -398,15 +398,18 @@ async def process_path_and_check_async(
 def display_item_result(item: Any, item_type: str) -> None:
     """Display the result for a single link or image item."""
     # Build status string with color coding
-    if item.is_valid:
+    if item.is_valid is True:
         status = "VALID"
         status_color = typer.colors.GREEN
-    else:
+    elif item.is_valid is False:
         status = "INVALID"
         status_color = typer.colors.RED
+    else:
+        status = "UNCHECKED"
+        status_color = typer.colors.YELLOW
 
     # Add status code if available
-    if item.status_code:
+    if item.status_code is not None:
         status += f" {item.status_code}"
 
     # Add update indicator
