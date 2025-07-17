@@ -41,15 +41,21 @@ class FileReferenceManager:
         include_pattern: str = "*.md",
         exclude_pattern: str | None = None,
     ) -> list[FileReference]:
-        """Find all references to a target file in markdown files.
+        """Find all references to ``target_file`` within markdown files.
 
-        Args:
-            target_file: The file to search references for
-            include_pattern: Glob pattern for files to include in search
-            exclude_pattern: Glob pattern for files to exclude from search
+        Parameters
+        ----------
+        target_file : Path
+            The file to search references for.
+        include_pattern : str, optional
+            Glob pattern for files to include in the search.
+        exclude_pattern : str or None, optional
+            Glob pattern for files to exclude from the search.
 
-        Returns:
-            List of FileReference objects
+        Returns
+        -------
+        list[FileReference]
+            All references found across the project.
         """
         references: list[FileReference] = []
         target_file = target_file.resolve()
@@ -187,12 +193,16 @@ class FileReferenceManager:
         return new_relative_path
 
     def move_file_and_update_references(self, source: Path, destination: Path, references: list[FileReference]) -> None:
-        """Move a file and update all references to it.
+        """Move ``source`` to ``destination`` and update all references.
 
-        Args:
-            source: Source file path
-            destination: Destination file path
-            references: List of references to update
+        Parameters
+        ----------
+        source : Path
+            Source file path.
+        destination : Path
+            Destination file path.
+        references : list[FileReference]
+            List of references to update.
         """
         # Create destination directory if it doesn't exist
         destination.parent.mkdir(parents=True, exist_ok=True)

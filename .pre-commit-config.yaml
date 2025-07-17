@@ -1,0 +1,62 @@
+repos:
+  # Ruff for linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.4
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix]
+        types_or: [python, pyi, jupyter]
+      # Run the formatter
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
+
+  # Type checking with ty
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: Type check with ty
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+  # Run tests
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run tests
+        entry: uv run pytest
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        stages: [manual]  # Only run when explicitly requested
+
+  # Markdown formatting with mdformat
+  - repo: https://github.com/hukkin/mdformat
+    rev: 0.7.22  # Use the ref you want to point at
+    hooks:
+    - id: mdformat
+      # Optionally add plugins
+      additional_dependencies:
+      - mdformat-gfm
+      - mdformat-ruff
+      - mdformat-config
+      - mdformat-gfm-alerts
+      - mdformat-tables
+      - mdformat-toc
+
+  # Additional useful hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: [--fix=lf]

@@ -18,16 +18,20 @@ def find_repo_root(path: Path) -> Path:
 
 
 def get_gitignore_matcher(base_dir: Path) -> Callable[[str], bool]:
-    """Get a gitignore matcher function that uses the spec-compliant gitignore_parser library.
+    """Return a matcher respecting all ``.gitignore`` files under ``base_dir``.
 
-    This function will automatically find and parse all .gitignore files from the repository
-    root down to and including all subdirectories within the base directory.
+    The function searches the repository root and all subdirectories for
+    ``.gitignore`` files and creates a single matcher that applies them all.
 
-    Args:
-        base_dir: The directory to start looking for .gitignore files
+    Parameters
+    ----------
+    base_dir : Path
+        The directory to start looking for ``.gitignore`` files.
 
-    Returns:
-        A function that takes a file path (as string) and returns True if the file should be ignored
+    Returns
+    -------
+    Callable[[str], bool]
+        Function that returns ``True`` if a path should be ignored.
     """
     repo_root: Path = find_repo_root(base_dir)
 
@@ -39,7 +43,7 @@ def get_gitignore_matcher(base_dir: Path) -> Callable[[str], bool]:
     dirs_to_check: list[Path] = []
     while current_dir != repo_root.parent:  # Stop after including repo_root
         dirs_to_check.append(current_dir)
-        if current_dir == repo_root:
+        if current_dir == repo_root or current_dir == current_dir.parent:
             break
         current_dir = current_dir.parent
 

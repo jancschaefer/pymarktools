@@ -7,9 +7,11 @@
 ![Codecov](https://img.shields.io/codecov/c/github/jancschaefer/pymarktools)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjancschaefer%2Fpymarktools%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
 
+A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project
+leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate
+easy development and testing.
 
-
-A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing.
+![check-screenshot](./docs/.attachments/readme-screenshot-check.png)
 
 ## Features
 
@@ -24,7 +26,6 @@ A set of markdown utilities for Python, designed to simplify the manipulation an
 
 ### Workflow
 
-- **Command line interface** with flexible option placement and callbacks
 - **Optional fail behavior** with `--fail/--no-fail` to control exit codes
 - **Gitignore integration** respecting `.gitignore` patterns
 - **File refactoring** capabilities to move files and update references
@@ -37,6 +38,10 @@ A set of markdown utilities for Python, designed to simplify the manipulation an
 - **Exit code behavior** suitable for CI/CD pipelines (0 for success, 1 for failures)
 
 ## Installation
+
+> [!NOTE]
+> **Python 3.12+ Required:** pymarktools requires Python 3.12+ and works best with modern terminal environments
+> that support color output.
 
 You can install pymarktools using several methods:
 
@@ -66,17 +71,52 @@ uvx pymarktools check --no-check-dead-images README.md
 
 ### Development Installation
 
+> [!TIP]
+> **Use uv for Best Experience:** For the best development experience, we recommend using `uv` for package
+> management and virtual environment handling.
+
 For development or contributing:
 
 ```bash
 git clone https://github.com/yourusername/pymarktools.git
 cd pymarktools
 uv install -e .
+
+# Install pre-commit hooks for code quality
+uv run pre-commit install
+
+# Or use the justfile to set up everything
+uv run just setup
+```
+
+This will install [pre-commit hooks](docs/pre-commit.md) that automatically run quality checks (linting, formatting,
+type checking) before each commit, ensuring your contributions meet the project's standards.
+
+> [!IMPORTANT]
+> **Always Install Pre-commit Hooks:** Pre-commit hooks are essential for maintaining code quality. Always
+> run `uv run pre-commit install` after cloning the repository to ensure your commits meet the project's standards.
+
+### Development Tasks
+
+The project includes a `justfile` for common development tasks:
+
+```bash
+# Show available tasks
+uv run just
+
+# Run all quality checks (same as CI)
+uv run just check
+
+# Run individual tasks
+uv run just lint
+uv run just format
+uv run just type-check
+uv run just test
 ```
 
 ## Usage
 
-After installation, you can use the command line interface to access the markdown utilities. The CLI supports flexible option placement and both global and command-specific options.
+After installation, you can use the command line interface to access the markdown utilities.
 
 ### Basic Usage
 
@@ -116,21 +156,6 @@ pymarktools check --no-check-dead-links <path>
 pymarktools check --no-check-dead-links docs/ --include "*.md" --exclude "draft_*"
 ```
 
-### Flexible Option Placement
-
-Options can be specified at the callback level (applying to all subcommands) or at the individual command level:
-
-```bash
-# Options at callback level (apply to all check commands)
-pymarktools check --timeout 30 --no-check-external --no-check-dead-images file.md
-
-# Options at command level (override callback settings)
-pymarktools check --no-check-dead-images file.md --timeout 10 --check-external
-
-# Mixed approach (command options override callback when both specified)
-pymarktools check --include "*.md" --no-check-dead-images --timeout 60 docs/
-```
-
 ### Local File Validation
 
 Control local file checking behavior:
@@ -155,6 +180,10 @@ Local file validation supports:
 
 ### External URL Checking and Redirect Fixing
 
+> [!WARNING]
+> **Automatic File Modification:** When using `--fix-redirects`, the tool will modify your source files
+> automatically. Always commit your changes or create a backup before using this option.
+
 Control external URL validation and redirect handling:
 
 ```bash
@@ -171,8 +200,7 @@ pymarktools check --no-check-dead-images <path> --fix-redirects
 pymarktools check --no-check-dead-images <path> --timeout 60
 ```
 
-These options apply to the unified `check` command and can be combined with the
-link or image toggles.
+These options apply to the unified `check` command and can be combined with the link or image toggles.
 
 ### Pattern Filtering
 
@@ -194,15 +222,21 @@ pymarktools check --no-check-dead-links assets/ --include "*.{jpg,png,gif}"
 
 ### Gitignore Support
 
-By default, the check commands will respect gitignore patterns when scanning directories. You can disable this behavior with:
+By default, the check commands will respect gitignore patterns when scanning directories. You can disable this behavior
+with:
 
 ```bash
 pymarktools check --no-check-dead-images <path> --no-follow-gitignore
 ```
 
-This option ensures that files and directories excluded by your `.gitignore` rules are not processed during checks, making the operation faster and more focused on relevant files.
+This option ensures that files and directories excluded by your `.gitignore` rules are not processed during checks,
+making the operation faster and more focused on relevant files.
 
 ### Async Processing
+
+> [!TIP]
+> **Significant Performance Gains:** Async processing provides significant performance improvements when checking
+> external URLs or processing large directories. Enable it with `--parallel` for better performance.
 
 For better performance when checking large numbers of links or images, pymarktools supports async processing:
 
@@ -223,13 +257,15 @@ Async processing is most beneficial when:
 - Processing large directories with many markdown files
 - Working with files containing numerous links/images
 
-The system automatically separates external URL checking (which benefits from async processing) from local file checking (which is typically fast enough sequentially).
+The system automatically separates external URL checking (which benefits from async processing) from local file checking
+(which is typically fast enough sequentially).
 
 - Checking external URLs (network I/O bound operations)
 - Processing large directories with many markdown files
 - Working with files containing numerous links/images
 
-The system automatically separates external URL checking (which benefits from parallelization) from local file checking (which is typically fast enough sequentially).
+The system automatically separates external URL checking (which benefits from parallelization) from local file checking
+(which is typically fast enough sequentially).
 
 ### Color Output
 
@@ -295,6 +331,10 @@ pymarktools refactor move old/path.md new/path.md --dry-run
 
 ### Exit Codes and CI/CD Integration
 
+> [!IMPORTANT]
+> **CI/CD Pipeline Integration:** The tool returns exit code 1 when broken links/images are found, making
+> it suitable for CI/CD pipelines. Use `--no-fail` to disable this behavior if needed.
+
 The tool returns appropriate exit codes for automation:
 
 - **Exit code 0**: All checks passed successfully
@@ -352,6 +392,56 @@ pymarktools --quiet check --no-check-dead-images docs/ --no-check-external
 # Full CI validation
 pymarktools check --no-check-dead-images . --include "*.md" --timeout 30 || exit 1
 ```
+
+## Configuration
+
+### pyproject.toml Support
+
+> [!NOTE]
+> **Project-wide Configuration:** Configuration via `pyproject.toml` allows you to set project-wide defaults,
+> reducing the need to specify options on every command invocation.
+
+pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default
+behavior without specifying options on every command invocation.
+
+Add configuration under the `[tool.pymarktools]` section:
+
+```toml
+[tool.pymarktools]
+# Paths to check (replaces the PATH argument)
+paths = ["src", "docs", "README.md"]
+
+# Check options
+timeout = 60
+check_external = false
+check_local = true
+include_pattern = "*.md"
+exclude_pattern = "test_*.md"
+parallel = false
+fail = true
+workers = 4
+```
+
+**Usage with configuration:**
+
+```bash
+# Uses paths and options from pyproject.toml
+pymarktools check
+
+# CLI arguments override configuration values
+pymarktools check --timeout 30 --check-external
+
+# Explicit path overrides configured paths
+pymarktools check specific-file.md
+```
+
+**Priority order** (highest to lowest):
+
+1. Command-line arguments
+1. pyproject.toml configuration
+1. Built-in defaults
+
+For complete configuration reference, see [docs/pyproject-config.md](docs/pyproject-config.md).
 
 ## Testing
 

@@ -21,23 +21,23 @@ passed_tests=0
 run_test() {
     local test_name=$1
     local command=$2
-    
+
     echo -e "${BLUE}Running test: ${test_name}${NC}"
     echo "Command: $command"
-    
+
     ((total_tests++))
-    
+
     # Execute command and store return code
     eval "$command" > /tmp/cmd_output.txt 2>&1
     local status=$?
-    
+
     # Only show output on failure (uncomment the lines below if you want to see output)
     if [ $status -ne 0 ] && [ $status -ne 1 ]; then
         echo "---------- Command Output (Failed with code $status) ----------"
         cat /tmp/cmd_output.txt
         echo "-----------------------------------"
     fi
-    
+
     # Check if the command executed successfully (this just checks if it ran, not if it found issues)
     if [ $status -eq 0 ] || [ $status -eq 1 ]; then
         echo -e "${GREEN}✓ Test completed${NC}"
@@ -45,7 +45,7 @@ run_test() {
     else
         echo -e "${RED}✗ Test failed with exit code $status${NC}"
     fi
-    
+
     echo ""
 }
 
@@ -202,7 +202,7 @@ run_test "Move a file and update references" "uv run pymarktools refactor move $
 run_test "Move with pattern filtering" "cp $temp_dir/sample.md $temp_dir/to_move2.md && uv run pymarktools refactor move $temp_dir/to_move2.md $temp_dir/moved_file2.md --include \"*.md\""
 run_test "Move with dry run" "cp $temp_dir/sample.md $temp_dir/to_move3.md && uv run pymarktools refactor move $temp_dir/to_move3.md $temp_dir/moved_file3.md --dry-run"
 
-# Section: CI/CD Integration 
+# Section: CI/CD Integration
 echo -e "${BLUE}=== Testing CI/CD Integration ===${NC}"
 
 run_test "Minimal CI check" "uv run pymarktools --quiet check $temp_dir/ --no-check-external"

@@ -34,9 +34,11 @@ def main(
         show_default=False,
     ),
 ) -> None:
-    """A set of markdown utilities for Python.
-    Tools for checking links, images, and refactoring markdown files.
-    Supports local file validation, external URL checking, and gitignore integration.
+    """Run the command-line interface for markdown utilities.
+
+    Provides tools for checking links, validating images and refactoring
+    markdown files. The CLI supports local file validation, external URL
+    checking and gitignore integration.
     """
     # Check for color-related environment variables
     env_color = os.getenv("PYMARKTOOLS_COLOR")

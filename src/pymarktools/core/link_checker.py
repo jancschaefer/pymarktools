@@ -253,7 +253,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             # External links but not checking - mark as valid
             for link in external_links:
                 link.is_valid = True
-                link.status_code = 200
+                link.status_code = 000
 
         # Process local links sequentially (file I/O is typically fast and doesn't benefit much from parallelization)
         for link in local_links:
@@ -285,13 +285,18 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
         exclude_pattern: str | None = None,
         progress_callback: Callable[[Path, list[LinkInfo]], None] | None = None,
     ) -> dict[Path, list[LinkInfo]]:
-        """Check all markdown files in a directory recursively using async processing.
+        """Check all markdown files in ``directory`` using async processing.
 
-        Args:
-            directory: Directory to search
-            include_pattern: Glob pattern for files to include (default: "*.md")
-            exclude_pattern: Glob pattern for files to exclude (optional)
-            progress_callback: Optional callback for progress reporting
+        Parameters
+        ----------
+        directory : Path
+            Directory to search.
+        include_pattern : str, optional
+            Glob pattern for files to include, by default ``"*.md"``.
+        exclude_pattern : str or None, optional
+            Glob pattern for files to exclude.
+        progress_callback : Callable[[Path, list[LinkInfo]], None] or None, optional
+            Optional callback for progress reporting.
         """
         # Discover files asynchronously
         files_to_check = await self.discover_files_async(directory, include_pattern, exclude_pattern)
@@ -311,12 +316,16 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
         include_pattern: str = "*.md",
         exclude_pattern: str | None = None,
     ) -> dict[Path, list[LinkInfo]]:
-        """Check all markdown files in a directory recursively (synchronous wrapper).
+        """Check all markdown files in ``directory`` synchronously.
 
-        Args:
-            directory: Directory to search
-            include_pattern: Glob pattern for files to include (default: "*.md")
-            exclude_pattern: Glob pattern for files to exclude (optional)
+        Parameters
+        ----------
+        directory : Path
+            Directory to search.
+        include_pattern : str, optional
+            Glob pattern for files to include, by default ``"*.md"``.
+        exclude_pattern : str or None, optional
+            Glob pattern for files to exclude.
         """
         return cast(
             dict[Path, list[LinkInfo]],

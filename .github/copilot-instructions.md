@@ -1,7 +1,8 @@
 ## Project Overview
 
-pymarktools is a Python library and CLI for validating and refactoring markdown files with link and image handling.
-For contribution workflow and style guidance, see `AGENTS.md` in the project root.
+pymarktools is a Python library and CLI for validating and refactoring markdown files with link and image handling. For
+contribution workflow and style guidance, see `AGENTS.md` in the project root.
+
 ## Style Guide
 
 - Target Python 3.13 with type hints on all public APIs.
@@ -46,9 +47,9 @@ src/pymarktools/
 - Use `uv` for virtual environment and commands: `uv install`, `uv run`, especially `uv run python`.
 - Commands follow Typer patterns with shared options in `state.py`.
 - Common flags:
-    - `--check-external`, `--check-local`, `--fix-redirects`
-    - `--include`, `--exclude`, `--parallel`, `--workers`
-    - `--quiet` (errors only), `--verbose` (detailed output), default (status + summary)
+  - `--check-external`, `--check-local`, `--fix-redirects`
+  - `--include`, `--exclude`, `--parallel`, `--workers`
+  - `--quiet` (errors only), `--verbose` (detailed output), default (status + summary)
 
 ### Async Processing
 
@@ -65,15 +66,16 @@ src/pymarktools/
 
 - Use automated color detection; fallback to plain text.
 - Status indicators:
-    - ✓ valid
-    - ✗ broken
-    - ⚠ warnings
+  - ✓ valid
+  - ✗ broken
+  - ⚠ warnings
 
 ### Changelog
 
-- When adding, changing, or removing features, update the `CHANGELOG.md` file with a clear description of the change, the reason for it, and any relevant context.
+- When adding, changing, or removing features, update the `CHANGELOG.md` file with a clear description of the change,
+  the reason for it, and any relevant context.
 - Use the format: `## [version] - [date]` (e.g., `## [0.2.0] - 2025-07-08`).
-    - Separate changes into sections: `Added`, `Changed`, `Removed`, `Fixed`, etc.
+  - Separate changes into sections: `Added`, `Changed`, `Removed`, `Fixed`, etc.
 - For unreleased changes, use `[unreleased]` as the version and date.
 - Follow the existing changelog structure for consistency.
 
@@ -98,7 +100,8 @@ src/pymarktools/
 
 ### Adding New Core Functionality
 
-1. Determine the appropriate core module (`models.py`, `link_checker.py`, `image_checker.py`, `gitignore.py`, or `refactor.py`)
+1. Determine the appropriate core module (`models.py`, `link_checker.py`, `image_checker.py`, `gitignore.py`, or
+   `refactor.py`)
 1. Implement the functionality as instance methods in existing classes or as new classes
 1. Write comprehensive tests in `tests/test_core/`
 1. Export public APIs through `__init__.py`
@@ -113,7 +116,7 @@ src/pymarktools/
 # Install in development mode
 uv install -e .
 
-# Install dev dependencies 
+# Install dev dependencies
 uv install pytest pytest-cov
 ```
 
