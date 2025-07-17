@@ -77,7 +77,8 @@ class TestCheckCommandIntegration:
         assert "timeout: 3s" in result.stdout  # Custom timeout from config
         assert "Checking external: False" in result.stdout  # check_external = false
         assert "Parallel processing: False" in result.stdout  # parallel = false
-        assert "docs/test.md" in result.stdout  # Should check the docs directory
+        # Should check the docs directory (handle both path separators)
+        assert ("docs/test.md" in result.stdout or "docs\\test.md" in result.stdout)
 
     def test_cli_args_override_config(self, runner, temp_project_with_config):
         """Test that CLI arguments override pyproject.toml values."""
@@ -102,7 +103,7 @@ class TestCheckCommandIntegration:
 
         # Should check the explicit file, not the paths from config
         assert "other.md" in result.stdout
-        assert "docs/test.md" not in result.stdout
+        assert not ("docs/test.md" in result.stdout or "docs\\test.md" in result.stdout)
 
     def test_check_without_config_uses_defaults(self, runner):
         """Test that check command uses defaults when no pyproject.toml exists."""
