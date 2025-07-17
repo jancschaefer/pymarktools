@@ -121,3 +121,6 @@ pydocstyle = { convention = 'numpy' }
 
 [tool.mdformat]
 wrap = 120
+exclude = [
+    ".venv/**"
+]
