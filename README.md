@@ -40,6 +40,10 @@ easy development and testing.
 
 ## Installation
 
+> [!NOTE]
+> **Python 3.12+ Required:** pymarktools requires Python 3.12+ and works best with modern terminal environments
+> that support color output.
+
 You can install pymarktools using several methods:
 
 ### Using pip
@@ -68,6 +72,10 @@ uvx pymarktools check --no-check-dead-images README.md
 
 ### Development Installation
 
+> [!TIP]
+> **Use uv for Best Experience:** For the best development experience, we recommend using `uv` for package
+> management and virtual environment handling.
+
 For development or contributing:
 
 ```bash
@@ -84,6 +92,10 @@ uv run just setup
 
 This will install [pre-commit hooks](docs/pre-commit.md) that automatically run quality checks (linting, formatting,
 type checking) before each commit, ensuring your contributions meet the project's standards.
+
+> [!IMPORTANT]
+> **Always Install Pre-commit Hooks:** Pre-commit hooks are essential for maintaining code quality. Always
+> run `uv run pre-commit install` after cloning the repository to ensure your commits meet the project's standards.
 
 ### Development Tasks
 
@@ -148,6 +160,10 @@ pymarktools check --no-check-dead-links docs/ --include "*.md" --exclude "draft_
 
 ### Flexible Option Placement
 
+> [!TIP]
+> **Maximum Flexibility:** Options can be specified at the callback level (applying to all subcommands) or at the
+> individual command level for maximum flexibility.
+
 Options can be specified at the callback level (applying to all subcommands) or at the individual command level:
 
 ```bash
@@ -184,6 +200,10 @@ Local file validation supports:
 - Proper path resolution from markdown file location
 
 ### External URL Checking and Redirect Fixing
+
+> [!WARNING]
+> **Automatic File Modification:** When using `--fix-redirects`, the tool will modify your source files
+> automatically. Always commit your changes or create a backup before using this option.
 
 Control external URL validation and redirect handling:
 
@@ -234,6 +254,10 @@ This option ensures that files and directories excluded by your `.gitignore` rul
 making the operation faster and more focused on relevant files.
 
 ### Async Processing
+
+> [!TIP]
+> **Significant Performance Gains:** Async processing provides significant performance improvements when checking
+> external URLs or processing large directories. Enable it with `--parallel` for better performance.
 
 For better performance when checking large numbers of links or images, pymarktools supports async processing:
 
@@ -328,6 +352,10 @@ pymarktools refactor move old/path.md new/path.md --dry-run
 
 ### Exit Codes and CI/CD Integration
 
+> [!IMPORTANT]
+> **CI/CD Pipeline Integration:** The tool returns exit code 1 when broken links/images are found, making
+> it suitable for CI/CD pipelines. Use `--no-fail` to disable this behavior if needed.
+
 The tool returns appropriate exit codes for automation:
 
 - **Exit code 0**: All checks passed successfully
@@ -389,6 +417,10 @@ pymarktools check --no-check-dead-images . --include "*.md" --timeout 30 || exit
 ## Configuration
 
 ### pyproject.toml Support
+
+> [!NOTE]
+> **Project-wide Configuration:** Configuration via `pyproject.toml` allows you to set project-wide defaults,
+> reducing the need to specify options on every command invocation.
 
 pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default
 behavior without specifying options on every command invocation.

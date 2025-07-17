@@ -5,6 +5,10 @@
 ![](https://badgen.net/github/release/jancschaefer/pymarktools)
 ![](https://badgen.net/github/checks/jancschaefer/pymarktools/main)
 
+> [!IMPORTANT]
+> **Automated Release Process:** This document outlines the automated release process for pymarktools.
+> Releases are handled through GitHub Actions with PyPI's trusted publisher (OIDC) authentication for security.
+
 This document outlines the release process for the pymarktools package.
 
 ## Overview
@@ -13,6 +17,10 @@ The pymarktools project uses automated releases through GitHub Actions with PyPI
 authentication. This means no manual API tokens are required - releases are fully automated and secure.
 
 ## Prerequisites
+
+> [!WARNING]
+> **Complete Preparation Required:** Ensure all prerequisites are met before starting the release process.
+> Incomplete preparation can lead to failed releases or rollbacks.
 
 - [ ] All tests are passing on the main branch
 - [ ] Version number has been updated in `pyproject.toml`
@@ -65,6 +73,10 @@ Production releases to PyPI happen when you create a GitHub release.
 1. **Wait for CI** to pass on the main branch
 
 ### Step 2: Create and Push a Git Tag
+
+> [!IMPORTANT]
+> **Version Matching Required:** The git tag must exactly match the version in `pyproject.toml` for the
+> automated release to work correctly.
 
 ```bash
 # Create a tag (must match the version in pyproject.toml)
@@ -170,6 +182,10 @@ If a release needs to be rolled back:
 ## Troubleshooting
 
 ### Common Issues
+
+> [!TIP]
+> **Prevention is Key:** Most release issues can be prevented by ensuring all prerequisites are met and testing
+> the release process with TestPyPI first.
 
 1. **"Permission denied" on PyPI**
 
