@@ -59,7 +59,7 @@ pymarktools automatically searches for `pyproject.toml` by walking up the direct
 Configuration values are applied in the following order (highest priority first):
 
 1. **Command-line arguments** - Explicit CLI flags and options
-2. **pyproject.toml configuration** - Values from `[tool.pymarktools]` section  
+2. **pyproject.toml configuration** - Values from `[tool.pymarktools]` section
 3. **Default values** - Built-in defaults
 
 ## Examples
@@ -77,7 +77,7 @@ parallel = false
 # Uses config values
 pymarktools check
 
-# CLI args override config  
+# CLI args override config
 pymarktools check --check-external --timeout 30
 ```
 

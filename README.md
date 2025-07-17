@@ -391,7 +391,7 @@ pymarktools check specific-file.md
 ```
 
 **Priority order** (highest to lowest):
-1. Command-line arguments 
+1. Command-line arguments
 2. pyproject.toml configuration
 3. Built-in defaults
 

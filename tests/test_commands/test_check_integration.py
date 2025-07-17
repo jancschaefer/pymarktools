@@ -78,7 +78,7 @@ class TestCheckCommandIntegration:
         assert "Checking external: False" in result.stdout  # check_external = false
         assert "Parallel processing: False" in result.stdout  # parallel = false
         # Should check the docs directory (handle both path separators)
-        assert ("docs/test.md" in result.stdout or "docs\\test.md" in result.stdout)
+        assert "docs/test.md" in result.stdout or "docs\\test.md" in result.stdout
 
     def test_cli_args_override_config(self, runner, temp_project_with_config):
         """Test that CLI arguments override pyproject.toml values."""

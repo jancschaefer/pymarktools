@@ -161,7 +161,7 @@ class TestFileReferenceManager:
         manager = FileReferenceManager(temp_dir)
 
         content = """# Test
-        
+
 [Link](./old.md)
 
 ![Image](./old.jpg)

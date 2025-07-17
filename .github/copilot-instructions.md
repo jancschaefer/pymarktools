@@ -113,7 +113,7 @@ src/pymarktools/
 # Install in development mode
 uv install -e .
 
-# Install dev dependencies 
+# Install dev dependencies
 uv install pytest pytest-cov
 ```
 
