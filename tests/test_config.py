@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-from pymarktools.config import find_pyproject_toml, load_pyproject_config, merge_check_options
 from pymarktools.check_options import check_options
+from pymarktools.config import find_pyproject_toml, load_pyproject_config, merge_check_options
 
 
 @pytest.fixture

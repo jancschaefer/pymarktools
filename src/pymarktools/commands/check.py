@@ -174,7 +174,7 @@ def check(
         paths_to_check = config_paths
     else:
         # Default to current directory
-        paths_to_check = [Path.cwd()]
+        paths_to_check: list[Path] = [Path.cwd()]
 
     if not local_options["check_dead_links"] and not local_options["check_dead_images"]:
         echo_error("Both checks disabled; nothing to do")

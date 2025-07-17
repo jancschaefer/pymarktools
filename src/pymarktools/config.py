@@ -3,11 +3,14 @@
 This module handles loading configuration from pyproject.toml files.
 """
 
+import logging
 import tomllib
 from pathlib import Path
 from typing import Any
 
 from .check_options import CheckOptions
+
+logger = logging.getLogger(__name__)
 
 
 def find_pyproject_toml(start_path: Path | None = None) -> Path | None:
@@ -57,8 +60,9 @@ def load_pyproject_config(pyproject_path: Path | None = None) -> dict[str, Any]:
         tool_config = data.get("tool", {})
         return tool_config.get("pymarktools", {})
     
-    except (tomllib.TOMLDecodeError, OSError):
+    except (tomllib.TOMLDecodeError, OSError) as e:
         # If there's an error reading the file, return empty config
+        logger.warning(f"Could not read {pyproject_path}: {e}")
         return {}
 
 
@@ -83,10 +87,10 @@ def merge_check_options(
         Tuple of (merged_options, paths_list)
     """
     # Start with base options
-    merged_options = base_options.copy()
+    merged_options: CheckOptions = base_options.copy()
     
     # Extract paths from pyproject config
-    paths = []
+    paths: list[Path] = []
     if "paths" in pyproject_config:
         paths_config = pyproject_config["paths"]
         if isinstance(paths_config, list):
