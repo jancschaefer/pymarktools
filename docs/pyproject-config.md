@@ -52,7 +52,8 @@ All command-line options for the `check` command can be configured in `pyproject
 
 ## Configuration Discovery
 
-pymarktools automatically searches for `pyproject.toml` by walking up the directory tree from the current working directory until it finds one.
+pymarktools automatically searches for `pyproject.toml` by walking up the directory tree from the current working
+directory until it finds one.
 
 ## Priority Order
 
@@ -105,4 +106,5 @@ output = "link-check-report.txt"
 
 ## Note
 
-This implementation uses the `[tool.pymarktools]` section for consistency with the package name. If you see references to `[tool.pymarkdocs]` in issues or documentation, please use `[tool.pymarktools]` instead.
+This implementation uses the `[tool.pymarktools]` section for consistency with the package name. If you see references
+to `[tool.pymarkdocs]` in issues or documentation, please use `[tool.pymarktools]` instead.

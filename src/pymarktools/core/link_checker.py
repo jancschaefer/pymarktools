@@ -253,7 +253,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             # External links but not checking - mark as valid
             for link in external_links:
                 link.is_valid = True
-                link.status_code = 200
+                link.status_code = 000
 
         # Process local links sequentially (file I/O is typically fast and doesn't benefit much from parallelization)
         for link in local_links:

@@ -9,7 +9,8 @@ This document outlines the release process for the pymarktools package.
 
 ## Overview
 
-The pymarktools project uses automated releases through GitHub Actions with PyPI's trusted publisher (OIDC) authentication. This means no manual API tokens are required - releases are fully automated and secure.
+The pymarktools project uses automated releases through GitHub Actions with PyPI's trusted publisher (OIDC)
+authentication. This means no manual API tokens are required - releases are fully automated and secure.
 
 ## Prerequisites
 

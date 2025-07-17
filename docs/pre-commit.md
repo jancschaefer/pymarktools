@@ -1,6 +1,7 @@
 # Pre-commit Hooks
 
-This project uses [pre-commit](https://pre-commit.com/) to run quality checks before each commit. The hooks ensure that code quality standards are maintained and match the checks run in CI.
+This project uses [pre-commit](https://pre-commit.com/) to run quality checks before each commit. The hooks ensure that
+code quality standards are maintained and match the checks run in CI.
 
 ## Setup
 

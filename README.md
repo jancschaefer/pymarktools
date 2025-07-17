@@ -7,7 +7,11 @@
 ![Codecov](https://img.shields.io/codecov/c/github/jancschaefer/pymarktools)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fjancschaefer%2Fpymarktools%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
 
-A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate easy development and testing.
+A set of markdown utilities for Python, designed to simplify the manipulation and parsing of markdown text. This project
+leverages Typer for a user-friendly command line interface and is built with a solid codebase structure to facilitate
+easy development and testing.
+
+![check-screenshot](./docs/.attachments/readme-screenshot-check.png)
 
 ## Features
 
@@ -78,7 +82,8 @@ uv run pre-commit install
 uv run just setup
 ```
 
-This will install [pre-commit hooks](docs/pre-commit.md) that automatically run quality checks (linting, formatting, type checking) before each commit, ensuring your contributions meet the project's standards.
+This will install [pre-commit hooks](docs/pre-commit.md) that automatically run quality checks (linting, formatting,
+type checking) before each commit, ensuring your contributions meet the project's standards.
 
 ### Development Tasks
 
@@ -100,7 +105,8 @@ uv run just test
 
 ## Usage
 
-After installation, you can use the command line interface to access the markdown utilities. The CLI supports flexible option placement and both global and command-specific options.
+After installation, you can use the command line interface to access the markdown utilities. The CLI supports flexible
+option placement and both global and command-specific options.
 
 ### Basic Usage
 
@@ -195,8 +201,7 @@ pymarktools check --no-check-dead-images <path> --fix-redirects
 pymarktools check --no-check-dead-images <path> --timeout 60
 ```
 
-These options apply to the unified `check` command and can be combined with the
-link or image toggles.
+These options apply to the unified `check` command and can be combined with the link or image toggles.
 
 ### Pattern Filtering
 
@@ -218,13 +223,15 @@ pymarktools check --no-check-dead-links assets/ --include "*.{jpg,png,gif}"
 
 ### Gitignore Support
 
-By default, the check commands will respect gitignore patterns when scanning directories. You can disable this behavior with:
+By default, the check commands will respect gitignore patterns when scanning directories. You can disable this behavior
+with:
 
 ```bash
 pymarktools check --no-check-dead-images <path> --no-follow-gitignore
 ```
 
-This option ensures that files and directories excluded by your `.gitignore` rules are not processed during checks, making the operation faster and more focused on relevant files.
+This option ensures that files and directories excluded by your `.gitignore` rules are not processed during checks,
+making the operation faster and more focused on relevant files.
 
 ### Async Processing
 
@@ -247,13 +254,15 @@ Async processing is most beneficial when:
 - Processing large directories with many markdown files
 - Working with files containing numerous links/images
 
-The system automatically separates external URL checking (which benefits from async processing) from local file checking (which is typically fast enough sequentially).
+The system automatically separates external URL checking (which benefits from async processing) from local file checking
+(which is typically fast enough sequentially).
 
 - Checking external URLs (network I/O bound operations)
 - Processing large directories with many markdown files
 - Working with files containing numerous links/images
 
-The system automatically separates external URL checking (which benefits from parallelization) from local file checking (which is typically fast enough sequentially).
+The system automatically separates external URL checking (which benefits from parallelization) from local file checking
+(which is typically fast enough sequentially).
 
 ### Color Output
 
@@ -381,7 +390,8 @@ pymarktools check --no-check-dead-images . --include "*.md" --timeout 30 || exit
 
 ### pyproject.toml Support
 
-pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default behavior without specifying options on every command invocation.
+pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default
+behavior without specifying options on every command invocation.
 
 Add configuration under the `[tool.pymarktools]` section:
 
