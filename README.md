@@ -144,6 +144,7 @@ pymarktools check --no-check-dead-images docs/ --timeout 60 --check-external
 
 # Check only local files, skip external URLs
 pymarktools check --no-check-dead-images docs/ --no-check-external
+# External URLs will be reported as [UNCHECKED]
 ```
 
 Check for dead images in a markdown file or directory:
@@ -192,6 +193,7 @@ pymarktools check --no-check-dead-images <path>
 
 # Disable external URL checking
 pymarktools check --no-check-dead-images <path> --no-check-external
+# Skipped external links/images are shown as [UNCHECKED] with no status code
 
 # Automatically fix permanent redirects in source files
 pymarktools check --no-check-dead-images <path> --fix-redirects
@@ -286,7 +288,7 @@ Color coding provides instant visual feedback:
 
 - **Green (✓)**: Valid links/images
 - **Red (✗)**: Broken or invalid references
-- **Yellow**: Warnings and redirects
+- **Yellow**: Warnings, redirects, or skipped external checks
 - **Blue**: Informational messages
 
 Colors are automatically disabled when output is redirected or in non-terminal environments.
