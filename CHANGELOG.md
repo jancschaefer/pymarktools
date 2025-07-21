@@ -12,6 +12,7 @@
 ### Changed
 
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
+- Improved `.gitignore` handling by skipping traversal into ignored directories.
 
 ## [0.3.0] - 2025-07-16
 
