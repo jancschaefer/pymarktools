@@ -12,6 +12,11 @@
 ### Changed
 
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
+- **External URL checking behavior**: When external checking is disabled (`--no-check-external`), external URLs and images are now properly marked as `[UNCHECKED]` with yellow status instead of being incorrectly marked as valid. This provides clearer feedback about what was actually validated versus skipped.
+
+### Fixed
+
+- Fixed misleading status reporting where external URLs/images were marked as valid when external checking was disabled. They are now correctly shown as `[UNCHECKED]` to indicate they were not validated.
 
 ## [0.3.0] - 2025-07-16
 
