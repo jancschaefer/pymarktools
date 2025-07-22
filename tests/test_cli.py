@@ -509,11 +509,14 @@ Thumbs.db
         # Create various files and directories
         (temp_path / "README.md").write_text("# Project\n\n[Link](https://example.com)")
 
-        # Create ignored directories
+        # Create ignored directories with nested content
         for ignored_dir in ["node_modules", ".venv", "dist", "__pycache__", ".vscode"]:
             dir_path = temp_path / ignored_dir
             dir_path.mkdir()
             (dir_path / "file.md").write_text("# Ignored\n\n[Link](https://example.com)")
+            nested_dir = dir_path / "lib"
+            nested_dir.mkdir()
+            (nested_dir / "nested.md").write_text("# Nested\n\n[Link](https://example.com)")
 
         # Create ignored files
         (temp_path / ".DS_Store").write_text("binary file")

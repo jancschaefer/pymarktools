@@ -85,6 +85,10 @@ class AsyncChecker[T]:
         async def process_directory_level(dir_path: Path) -> list[Path]:
             """Process a single directory level and return matching files."""
             try:
+                # Skip processing if the directory itself is ignored
+                if self.follow_gitignore and gitignore_matcher and is_path_ignored(dir_path, gitignore_matcher):
+                    return []
+
                 files: list[Path] = []
                 subdirs: list[Path] = []
 
@@ -93,6 +97,8 @@ class AsyncChecker[T]:
                     if item.is_file():
                         files.append(item)
                     elif item.is_dir():
+                        if self.follow_gitignore and gitignore_matcher and is_path_ignored(item, gitignore_matcher):
+                            continue
                         subdirs.append(item)
 
                 # Process files in current directory

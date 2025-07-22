@@ -12,6 +12,7 @@
 ### Changed
 
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
+- Improved `.gitignore` handling by skipping traversal into ignored directories.
 - **External URL checking behavior**: When external checking is disabled (`--no-check-external`), external URLs and images are now properly marked as `[UNCHECKED]` with yellow status instead of being incorrectly marked as valid. This provides clearer feedback about what was actually validated versus skipped.
 
 ### Fixed
