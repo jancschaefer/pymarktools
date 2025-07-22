@@ -1,8 +1,8 @@
 # pyproject.toml Configuration Support
 
 > [!TIP]
-> **Consistent Team Configuration:** Using `pyproject.toml` configuration reduces the need to specify options on
-> every command invocation and ensures consistent behavior across your team.
+> **Consistent Team Configuration:** Using `pyproject.toml` configuration reduces the need to specify options on every
+> command invocation and ensures consistent behavior across your team.
 
 This document describes how to configure pymarktools using `pyproject.toml`.
 
@@ -57,8 +57,8 @@ All command-line options for the `check` command can be configured in `pyproject
 ## Configuration Discovery
 
 > [!NOTE]
-> **Automatic Discovery:** pymarktools automatically searches for `pyproject.toml` by walking up the directory
-> tree from the current working directory until it finds one.
+> **Automatic Discovery:** pymarktools automatically searches for `pyproject.toml` by walking up the directory tree from
+> the current working directory until it finds one.
 
 pymarktools automatically searches for `pyproject.toml` by walking up the directory tree from the current working
 directory until it finds one.
@@ -66,8 +66,8 @@ directory until it finds one.
 ## Priority Order
 
 > [!IMPORTANT]
-> **Predictable Configuration Behavior:** Understanding the priority order is crucial for predictable
-> behavior. Command-line arguments always take precedence over configuration file settings.
+> **Predictable Configuration Behavior:** Understanding the priority order is crucial for predictable behavior.
+> Command-line arguments always take precedence over configuration file settings.
 
 Configuration values are applied in the following order (highest priority first):
 

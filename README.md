@@ -40,8 +40,8 @@ easy development and testing.
 ## Installation
 
 > [!NOTE]
-> **Python 3.12+ Required:** pymarktools requires Python 3.12+ and works best with modern terminal environments
-> that support color output.
+> **Python 3.12+ Required:** pymarktools requires Python 3.12+ and works best with modern terminal environments that
+> support color output.
 
 You can install pymarktools using several methods:
 
@@ -72,8 +72,8 @@ uvx pymarktools check --no-check-dead-images README.md
 ### Development Installation
 
 > [!TIP]
-> **Use uv for Best Experience:** For the best development experience, we recommend using `uv` for package
-> management and virtual environment handling.
+> **Use uv for Best Experience:** For the best development experience, we recommend using `uv` for package management
+> and virtual environment handling.
 
 For development or contributing:
 
@@ -93,8 +93,8 @@ This will install [pre-commit hooks](docs/pre-commit.md) that automatically run 
 type checking) before each commit, ensuring your contributions meet the project's standards.
 
 > [!IMPORTANT]
-> **Always Install Pre-commit Hooks:** Pre-commit hooks are essential for maintaining code quality. Always
-> run `uv run pre-commit install` after cloning the repository to ensure your commits meet the project's standards.
+> **Always Install Pre-commit Hooks:** Pre-commit hooks are essential for maintaining code quality. Always run
+> `uv run pre-commit install` after cloning the repository to ensure your commits meet the project's standards.
 
 ### Development Tasks
 
@@ -182,8 +182,8 @@ Local file validation supports:
 ### External URL Checking and Redirect Fixing
 
 > [!WARNING]
-> **Automatic File Modification:** When using `--fix-redirects`, the tool will modify your source files
-> automatically. Always commit your changes or create a backup before using this option.
+> **Automatic File Modification:** When using `--fix-redirects`, the tool will modify your source files automatically.
+> Always commit your changes or create a backup before using this option.
 
 Control external URL validation and redirect handling:
 
@@ -334,8 +334,8 @@ pymarktools refactor move old/path.md new/path.md --dry-run
 ### Exit Codes and CI/CD Integration
 
 > [!IMPORTANT]
-> **CI/CD Pipeline Integration:** The tool returns exit code 1 when broken links/images are found, making
-> it suitable for CI/CD pipelines. Use `--no-fail` to disable this behavior if needed.
+> **CI/CD Pipeline Integration:** The tool returns exit code 1 when broken links/images are found, making it suitable
+> for CI/CD pipelines. Use `--no-fail` to disable this behavior if needed.
 
 The tool returns appropriate exit codes for automation:
 
@@ -400,8 +400,8 @@ pymarktools check --no-check-dead-images . --include "*.md" --timeout 30 || exit
 ### pyproject.toml Support
 
 > [!NOTE]
-> **Project-wide Configuration:** Configuration via `pyproject.toml` allows you to set project-wide defaults,
-> reducing the need to specify options on every command invocation.
+> **Project-wide Configuration:** Configuration via `pyproject.toml` allows you to set project-wide defaults, reducing
+> the need to specify options on every command invocation.
 
 pymarktools supports configuration via `pyproject.toml` for project-wide settings. This allows you to define default
 behavior without specifying options on every command invocation.
