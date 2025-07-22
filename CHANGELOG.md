@@ -13,6 +13,14 @@
 
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
 - Improved `.gitignore` handling by skipping traversal into ignored directories.
+- **External URL checking behavior**: When external checking is disabled (`--no-check-external`), external URLs and
+  images are now properly marked as `[UNCHECKED]` with yellow status instead of being incorrectly marked as valid. This
+  provides clearer feedback about what was actually validated versus skipped.
+
+### Fixed
+
+- Fixed misleading status reporting where external URLs/images were marked as valid when external checking was disabled.
+  They are now correctly shown as `[UNCHECKED]` to indicate they were not validated.
 
 ## [0.3.0] - 2025-07-16
 
@@ -49,8 +57,8 @@
 ### [0.2.0] - Fixed
 
 - Fixed bug where email links with `mailto:` scheme were incorrectly treated as local file paths instead of external
-  URLs. Email links are now properly recognized as external and validated by checking domain existence rather than
-  being flagged as missing local files.
+  URLs. Email links are now properly recognized as external and validated by checking domain existence rather than being
+  flagged as missing local files.
 
 ## [0.1.0] - 2025-07-08
 

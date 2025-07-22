@@ -102,12 +102,11 @@ Line 3 with [another link](https://test.com)"""
 
         links = checker.check_file(temp_markdown_file)
 
-        # External links should be marked as valid (not checked)
-        # Local links will fail since the files don't exist, but that's expected
+        # External links should be marked as unchecked when skipping external validation
         external_links = [link for link in links if link.is_local is False]
-        assert all(link.is_valid for link in external_links)
-        # When external checking is disabled, status_code should be 000 (not checked)
-        assert all(link.status_code == 000 for link in external_links)
+        assert all(link.is_valid is None for link in external_links)
+        # When external checking is disabled, no status code should be recorded
+        assert all(link.status_code is None for link in external_links)
 
     def test_init_with_custom_params(self):
         checker = DeadLinkChecker(
@@ -222,9 +221,9 @@ Line 3 with [another link](https://test.com)"""
 
             assert len(links) == 3
 
-            # External link should be valid (not checked)
+            # External link should be marked as unchecked
             external_link = [link for link in links if link.url == "https://example.com"][0]
-            assert external_link.is_valid is True
+            assert external_link.is_valid is None
             assert external_link.is_local is False
 
             # Existing local file should be valid
@@ -254,8 +253,12 @@ Line 3 with [another link](https://test.com)"""
 
             links = checker.check_file(md_file)
 
-            # All links should be marked as valid when checking is disabled
-            assert all(link.is_valid for link in links)
+            # External links remain unchecked when both checks are disabled
+            external_links = [link for link in links if link.is_local is False]
+            assert all(link.is_valid is None for link in external_links)
+            # Local links are treated as valid when local checking is disabled
+            local_links = [link for link in links if link.is_local]
+            assert all(link.is_valid for link in local_links)
 
             # Local links should be marked as local
             local_link = [link for link in links if link.url == "missing.md"][0]
