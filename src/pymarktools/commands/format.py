@@ -2,7 +2,6 @@
 
 import re
 from pathlib import Path
-from typing import Any
 
 import typer
 
@@ -73,7 +72,6 @@ class MarkdownFormatter:
     
     def __init__(self) -> None:
         """Initialize the formatter with default rules."""
-        pass
     
     def format_content(self, content: str) -> tuple[str, list[str]]:
         """Format markdown content and return formatted content with changes list.

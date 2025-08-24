@@ -75,7 +75,6 @@ class MarkdownConverter:
     
     def __init__(self) -> None:
         """Initialize the converter."""
-        pass
     
     def extract_links(self, content: str, file_path: Path | None = None) -> list[dict[str, Any]]:
         """Extract links from markdown content.

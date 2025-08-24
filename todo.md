@@ -7,23 +7,20 @@
 4. ✅ Configuration via pyproject.toml
 5. ✅ Async processing and parallel execution
 6. ✅ CLI interface with global options and color output
-
-## In Progress / Planned
-
-7. **Format Command** - Add a `format` command to standardize markdown files
+7. ✅ **Format Command** - Add a `format` command to standardize markdown files
    - Fix common markdown formatting issues (spacing, indentation)
    - Standardize link and image reference formatting
    - Ensure consistent heading structure
-   
-8. **Report Command** - Add a `report` command to generate markdown analysis reports
+8. ✅ **Report Command** - Add a `report` command to generate markdown analysis reports
    - Generate summary reports of link/image validation results
    - Create table of contents from headings
    - Analyze markdown structure and provide insights
-
-9. **Convert Command** - Add a `convert` command for format transformation
+9. ✅ **Convert Command** - Add a `convert` command for format transformation
    - Extract links and images to separate files/formats
    - Convert between different markdown flavors
    - Generate link inventories in various formats (JSON, CSV, etc.)
+
+## In Progress / Planned
 
 10. **Validate Command** - Add structural markdown validation
     - Check for proper heading hierarchy

@@ -8,8 +8,6 @@ from typing import Any
 import typer
 
 from ..core.gitignore import get_gitignore_matcher, is_path_ignored
-from ..core.link_checker import DeadLinkChecker
-from ..core.image_checker import DeadImageChecker
 from ..global_state import global_state
 
 
@@ -76,7 +74,6 @@ class MarkdownAnalyzer:
     
     def __init__(self) -> None:
         """Initialize the analyzer."""
-        pass
     
     def analyze_headings(self, content: str) -> dict[str, Any]:
         """Analyze heading structure in markdown content.
@@ -110,7 +107,7 @@ class MarkdownAnalyzer:
         issues = []
         prev_level = 0
         
-        for i, heading in enumerate(headings):
+        for _i, heading in enumerate(headings):
             level = heading['level']
             if prev_level > 0 and level > prev_level + 1:
                 issues.append(f"Line {heading['line']}: Heading level jumps from h{prev_level} to h{level}")
