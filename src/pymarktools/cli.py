@@ -7,7 +7,7 @@ import typer
 from . import __version__
 
 # Import the command modules
-from .commands import check, refactor_app
+from .commands import check, refactor_app, format_app, report_app, convert_app
 from .global_state import global_state
 
 # Create the main application
@@ -80,6 +80,9 @@ def raise_(ex):
 # Register commands
 app.command("check")(check)
 app.add_typer(refactor_app, name="refactor")
+app.add_typer(format_app, name="format")
+app.add_typer(report_app, name="report") 
+app.add_typer(convert_app, name="convert")
 
 
 # Main entry point
