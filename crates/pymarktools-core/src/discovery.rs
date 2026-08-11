@@ -47,12 +47,17 @@ fn build_root_gitignore(
     root: &Path,
     follow_gitignore: bool,
 ) -> Result<Option<ignore::gitignore::Gitignore>, String> {
-    let gitignore_path = root.join(".gitignore");
-    if !follow_gitignore || !gitignore_path.is_file() {
+    if !follow_gitignore {
         return Ok(None);
     }
 
-    let mut builder = GitignoreBuilder::new(root);
+    let Some((base, gitignore_path)) = root.ancestors().find_map(|ancestor| {
+        let candidate = ancestor.join(".gitignore");
+        candidate.is_file().then_some((ancestor, candidate))
+    }) else {
+        return Ok(None);
+    };
+    let mut builder = GitignoreBuilder::new(base);
     builder.add(gitignore_path);
     builder.build().map(Some).map_err(|error| error.to_string())
 }

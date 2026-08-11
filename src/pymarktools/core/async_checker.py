@@ -1,14 +1,13 @@
 """Base async checker class for pymarktools."""
 
 import asyncio
-import fnmatch
 import logging
 import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar
 
-from .gitignore import get_gitignore_matcher, is_path_ignored
+from pymarktools import _native
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +50,17 @@ class AsyncChecker[T]:
         exclude_pattern: str | None = None,
     ) -> list[Path]:
         """Discover files asynchronously with first-level directory listing and parallel expansion."""
+        return [
+            Path(path)
+            for path in _native.discover_files(
+                str(directory),
+                include_pattern,
+                exclude_pattern,
+                self.follow_gitignore,
+            )
+        ]
+
+        # Kept temporarily for migration-reference parity; remove with the old gitignore facade.
         if not directory.is_dir():
             return [directory] if directory.is_file() else []
 
