@@ -37,6 +37,13 @@ easy development and testing.
 - **Verbose and quiet modes** for detailed output control
 - **Exit code behavior** suitable for CI/CD pipelines (0 for success, 1 for failures)
 
+### Native Core
+
+- **Rust-powered validation and refactoring** for Markdown parsing, file discovery, HTTP checks, configuration loading,
+  and reference rewriting
+- **Prebuilt wheels** for Linux, macOS, and Windows keep normal `pip`, `uv`, and `uvx` installation workflows intact
+- **Source builds require Rust**; published wheels do not
+
 ## Installation
 
 > [!NOTE]

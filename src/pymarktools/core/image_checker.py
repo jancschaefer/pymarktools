@@ -38,7 +38,7 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
 
     def extract_images(self, content: str) -> list[ImageInfo]:
         """Extract all images from markdown content."""
-        return cast(list[ImageInfo], _native.extract_images(content))
+        return _native.extract_images(content)
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""

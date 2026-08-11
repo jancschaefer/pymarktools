@@ -38,7 +38,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
     def extract_links(self, content: str) -> list[LinkInfo]:
         """Extract all links from markdown content, excluding images."""
-        return cast(list[LinkInfo], _native.extract_links(content))
+        return _native.extract_links(content)
 
     def is_email_url(self, url: str) -> bool:
         """Check if URL is an email (mailto:) link."""

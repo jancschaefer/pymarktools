@@ -1,6 +1,21 @@
 """Typed bindings for pymarktools' compiled Rust core."""
 
 class LinkInfo:
+    def __init__(
+        self,
+        text: str,
+        url: str,
+        line_number: int,
+        is_valid: bool | None = None,
+        status_code: int | None = None,
+        error: str | None = None,
+        redirect_url: str | None = None,
+        is_permanent_redirect: bool | None = None,
+        updated: bool = False,
+        is_local: bool | None = None,
+        local_path: str | None = None,
+    ) -> None: ...
+
     text: str
     url: str
     line_number: int
@@ -14,6 +29,21 @@ class LinkInfo:
     local_path: str | None
 
 class ImageInfo:
+    def __init__(
+        self,
+        alt_text: str,
+        url: str,
+        line_number: int,
+        is_valid: bool | None = None,
+        status_code: int | None = None,
+        error: str | None = None,
+        redirect_url: str | None = None,
+        is_permanent_redirect: bool | None = None,
+        updated: bool = False,
+        is_local: bool | None = None,
+        local_path: str | None = None,
+    ) -> None: ...
+
     alt_text: str
     url: str
     line_number: int
