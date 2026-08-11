@@ -20,8 +20,6 @@ classifiers = [
 ]
 
 dependencies = [
-    "gitignore-parser>=0.1.12",
-    "httpx>=0.28.1",
     "typer>=0.16.0",
 ]
 scripts = { pymarktools = "pymarktools.cli:app", pymd = "pymarktools.cli:app" }

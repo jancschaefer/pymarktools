@@ -5,8 +5,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
-import httpx
-
 from pymarktools import _native
 
 from .async_checker import AsyncChecker
@@ -37,6 +35,7 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
             parallel=parallel,
             workers=workers,
         )
+
     def extract_images(self, content: str) -> list[ImageInfo]:
         """Extract all images from markdown content."""
         return cast(list[ImageInfo], _native.extract_images(content))
@@ -81,40 +80,17 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
 
     async def check_url_async(self, url: str) -> dict[str, Any]:
         """Check if a URL is valid and get redirect information asynchronously."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "status_code": None,
-            "error": None,
-            "redirect_url": None,
-            "is_permanent_redirect": False,
-        }
-
         if not self.is_external_url(url):
             # Local file reference, don't check with HTTP
-            result["is_valid"] = True
-            return result
+            return {
+                "is_valid": True,
+                "status_code": None,
+                "error": None,
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
 
         return cast(dict[str, Any], _native.check_url(url, self.timeout))
-
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
-                response: httpx.Response = await client.head(url)
-                result["status_code"] = response.status_code
-
-                # Check for redirects (301 permanent, 302 temporary)
-                if response.status_code in (301, 307, 308):  # Permanent redirects
-                    result["is_permanent_redirect"] = True
-                    result["redirect_url"] = response.headers.get("location")
-                elif response.status_code == 302:  # Temporary redirect
-                    result["redirect_url"] = response.headers.get("location")
-
-                # Consider anything in 2xx range as valid
-                result["is_valid"] = 200 <= response.status_code < 300 or response.status_code in (301, 302, 307, 308)
-
-        except httpx.RequestError as e:
-            result["error"] = str(e)
-
-        return result
 
     async def check_file_async(self, file_path: Path) -> list[ImageInfo]:
         """Check all images in a single markdown file asynchronously."""

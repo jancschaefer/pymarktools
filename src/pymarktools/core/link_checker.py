@@ -5,8 +5,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
-import httpx
-
 from pymarktools import _native
 
 from .async_checker import AsyncChecker
@@ -37,6 +35,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             parallel=parallel,
             workers=workers,
         )
+
     def extract_links(self, content: str) -> list[LinkInfo]:
         """Extract all links from markdown content, excluding images."""
         return cast(list[LinkInfo], _native.extract_links(content))
@@ -66,46 +65,18 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
     async def check_email_domain_async(self, email_url: str) -> dict[str, Any]:
         """Check if an email domain exists by validating the domain via HTTP."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "status_code": None,
-            "error": None,
-            "redirect_url": None,
-            "is_permanent_redirect": False,
-        }
-
         try:
             domain = self.extract_email_domain(email_url)
-
-            return cast(dict[str, Any], _native.check_email_domain(domain, self.timeout))
-
-            # Try to validate domain existence by making a simple HTTP request
-            # This is a basic check - we're just verifying the domain resolves
-            domain_url = f"https://{domain}"
-
-            # verify=False allows tests to run in environments without valid TLS
-            # certificates. Consider enabling verification in production.
-            async with httpx.AsyncClient(
-                timeout=self.timeout,
-                follow_redirects=False,
-                verify=False,
-            ) as client:
-                response: httpx.Response = await client.head(domain_url)
-                result["status_code"] = response.status_code
-
-                # For email domains, we consider any response (even 4xx/5xx) as valid
-                # since we're just checking if the domain exists, not if it serves a website
-                result["is_valid"] = True
-
         except ValueError as e:
-            result["error"] = f"Invalid email format: {e}"
-        except httpx.RequestError as e:
-            # Network errors might indicate domain doesn't exist
-            result["error"] = f"Domain validation failed: {e}"
-        except Exception as e:
-            result["error"] = f"Email domain check failed: {e}"
+            return {
+                "is_valid": False,
+                "status_code": None,
+                "error": f"Invalid email format: {e}",
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
 
-        return result
+        return cast(dict[str, Any], _native.check_email_domain(domain, self.timeout))
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
@@ -147,50 +118,21 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
     async def check_url_async(self, url: str) -> dict[str, Any]:
         """Check if a URL is valid and get redirect information asynchronously."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "status_code": None,
-            "error": None,
-            "redirect_url": None,
-            "is_permanent_redirect": False,
-        }
-
         if not self.is_external_url(url):
             # Local file reference, don't check with HTTP
-            result["is_valid"] = True
-            return result
+            return {
+                "is_valid": True,
+                "status_code": None,
+                "error": None,
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
 
         # Handle email URLs specially
         if self.is_email_url(url):
             return await self.check_email_domain_async(url)
 
         return cast(dict[str, Any], _native.check_url(url, self.timeout))
-
-        try:
-            # verify=False allows tests to run in environments without valid TLS
-            # certificates. Consider enabling verification in production.
-            async with httpx.AsyncClient(
-                timeout=self.timeout,
-                follow_redirects=False,
-                verify=False,
-            ) as client:
-                response: httpx.Response = await client.head(url)
-                result["status_code"] = response.status_code
-
-                # Check for redirects (301 permanent, 302 temporary)
-                if response.status_code in (301, 307, 308):  # Permanent redirects
-                    result["is_permanent_redirect"] = True
-                    result["redirect_url"] = response.headers.get("location")
-                elif response.status_code == 302:  # Temporary redirect
-                    result["redirect_url"] = response.headers.get("location")
-
-                # Consider anything in 2xx range as valid
-                result["is_valid"] = 200 <= response.status_code < 300 or response.status_code in (301, 302, 307, 308)
-
-        except httpx.RequestError as e:
-            result["error"] = str(e)
-
-        return result
 
     async def check_file_async(self, file_path: Path) -> list[LinkInfo]:
         """Check all links in a single markdown file asynchronously."""
