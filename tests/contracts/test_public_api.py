@@ -37,6 +37,13 @@ def test_python_checkers_expose_native_result_objects() -> None:
     assert isinstance(result, native.LinkInfo)
 
 
+def test_native_path_resolution_strips_fragments_and_queries() -> None:
+    """Native local path resolution keeps the established URL-cleaning rules."""
+    import pymarktools._native as native
+
+    assert native.resolve_local_path("../guide.md#install?unused", "fixtures/docs/README.md") == "fixtures/guide.md"
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]

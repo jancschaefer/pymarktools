@@ -4,6 +4,7 @@ use pymarktools_core::markdown::{
     extract_images as extract_core_images, extract_links as extract_core_links,
 };
 use pymarktools_core::model::{ImageInfo, LinkInfo};
+use pymarktools_core::paths::resolve_local_path as resolve_core_local_path;
 use pyo3::prelude::*;
 
 /// Python-visible information about a Markdown link.
@@ -190,6 +191,14 @@ fn extract_images_py(content: &str) -> Vec<PyImageInfo> {
         .collect()
 }
 
+/// Resolve a local Markdown reference relative to its document path.
+#[pyfunction(name = "resolve_local_path")]
+fn resolve_local_path_py(url: &str, document_path: &str) -> String {
+    resolve_core_local_path(url, std::path::Path::new(document_path))
+        .to_string_lossy()
+        .into_owned()
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -197,5 +206,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<PyImageInfo>()?;
     module.add_function(wrap_pyfunction!(core_version, module)?)?;
     module.add_function(wrap_pyfunction!(extract_links_py, module)?)?;
-    module.add_function(wrap_pyfunction!(extract_images_py, module)?)
+    module.add_function(wrap_pyfunction!(extract_images_py, module)?)?;
+    module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)
 }
