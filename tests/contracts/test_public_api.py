@@ -72,6 +72,13 @@ def test_native_http_returns_the_existing_result_shape() -> None:
     assert isinstance(result["error"], str)
 
 
+def test_native_relative_reference_uses_forward_slashes() -> None:
+    """Rust computes portable Markdown reference paths."""
+    import pymarktools._native as native
+
+    assert native.relative_reference("docs/guides", "assets/logo.svg") == "../../assets/logo.svg"
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]

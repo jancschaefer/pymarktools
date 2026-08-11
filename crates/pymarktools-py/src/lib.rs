@@ -7,6 +7,7 @@ use pymarktools_core::markdown::{
 };
 use pymarktools_core::model::{ImageInfo, LinkInfo};
 use pymarktools_core::paths::resolve_local_path as resolve_core_local_path;
+use pymarktools_core::refactor::relative_reference as relative_core_reference;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -237,6 +238,14 @@ fn check_url_py(py: Python<'_>, url: &str, timeout: u64) -> PyResult<Py<PyDict>>
     Ok(values.unbind())
 }
 
+#[pyfunction(name = "relative_reference")]
+fn relative_reference_py(from_dir: &str, to_file: &str) -> String {
+    relative_core_reference(
+        std::path::Path::new(from_dir),
+        std::path::Path::new(to_file),
+    )
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -247,5 +256,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(extract_images_py, module)?)?;
     module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)?;
     module.add_function(wrap_pyfunction!(discover_files_py, module)?)?;
-    module.add_function(wrap_pyfunction!(check_url_py, module)?)
+    module.add_function(wrap_pyfunction!(check_url_py, module)?)?;
+    module.add_function(wrap_pyfunction!(relative_reference_py, module)?)
 }
