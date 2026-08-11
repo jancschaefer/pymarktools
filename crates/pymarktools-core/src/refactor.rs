@@ -21,6 +21,12 @@ pub fn relative_reference(from_dir: &Path, to_file: &Path) -> String {
     }
 }
 
+/// Replace one target path inside a Markdown link or image reference.
+#[must_use]
+pub fn rewrite_reference(reference: &str, old_target: &str, new_target: &str) -> String {
+    reference.replacen(&format!("({old_target})"), &format!("({new_target})"), 1)
+}
+
 fn components(path: &Path) -> Vec<String> {
     path.components()
         .filter_map(|component| match component {
