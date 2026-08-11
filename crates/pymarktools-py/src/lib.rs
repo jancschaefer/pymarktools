@@ -1,12 +1,14 @@
 //! PyO3 bindings for the pymarktools Rust core.
 
 use pymarktools_core::discovery::discover_markdown_files;
+use pymarktools_core::http::check_url as check_core_url;
 use pymarktools_core::markdown::{
     extract_images as extract_core_images, extract_links as extract_core_links,
 };
 use pymarktools_core::model::{ImageInfo, LinkInfo};
 use pymarktools_core::paths::resolve_local_path as resolve_core_local_path;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 /// Python-visible information about a Markdown link.
 #[pyclass(name = "LinkInfo", module = "pymarktools._native")]
@@ -223,6 +225,18 @@ fn discover_files_py(
     .map_err(pyo3::exceptions::PyValueError::new_err)
 }
 
+#[pyfunction(name = "check_url")]
+fn check_url_py(py: Python<'_>, url: &str, timeout: u64) -> PyResult<Py<PyDict>> {
+    let result = py.allow_threads(|| check_core_url(url, timeout));
+    let values = PyDict::new(py);
+    values.set_item("is_valid", result.is_valid)?;
+    values.set_item("status_code", result.status_code)?;
+    values.set_item("error", result.error)?;
+    values.set_item("redirect_url", result.redirect_url)?;
+    values.set_item("is_permanent_redirect", result.is_permanent_redirect)?;
+    Ok(values.unbind())
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -232,5 +246,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(extract_links_py, module)?)?;
     module.add_function(wrap_pyfunction!(extract_images_py, module)?)?;
     module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)?;
-    module.add_function(wrap_pyfunction!(discover_files_py, module)?)
+    module.add_function(wrap_pyfunction!(discover_files_py, module)?)?;
+    module.add_function(wrap_pyfunction!(check_url_py, module)?)
 }

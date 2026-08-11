@@ -162,6 +162,8 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
         if self.is_email_url(url):
             return await self.check_email_domain_async(url)
 
+        return cast(dict[str, Any], _native.check_url(url, self.timeout))
+
         try:
             # verify=False allows tests to run in environments without valid TLS
             # certificates. Consider enabling verification in production.

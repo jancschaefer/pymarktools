@@ -56,6 +56,22 @@ def test_native_discovery_honors_gitignore(tmp_path: Path) -> None:
     assert native.discover_files(str(tmp_path)) == [str(tmp_path / "keep.md")]
 
 
+def test_native_http_returns_the_existing_result_shape() -> None:
+    """Native HTTP failures retain the dictionary fields consumed by checkers."""
+    import pymarktools._native as native
+
+    result = native.check_url("not a url", 1)
+
+    assert result == {
+        "is_valid": False,
+        "status_code": None,
+        "error": result["error"],
+        "redirect_url": None,
+        "is_permanent_redirect": False,
+    }
+    assert isinstance(result["error"], str)
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]

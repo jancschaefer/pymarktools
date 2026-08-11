@@ -94,6 +94,8 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
             result["is_valid"] = True
             return result
 
+        return cast(dict[str, Any], _native.check_url(url, self.timeout))
+
         try:
             async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=False) as client:
                 response: httpx.Response = await client.head(url)
