@@ -80,41 +80,28 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "error": None,
-            "resolved_path": None,
-        }
-
         try:
-            # Handle different types of local links
-            clean_url: str = url.split("#")[0].split("?")[0]  # Remove anchors and query params
-
-            if clean_url.startswith("/"):
-                # Absolute path - resolve from base_path parent directory
-                # This assumes the markdown file is in a subdirectory of the project
-                resolved_path: Path = base_path.parent / clean_url.lstrip("/")
-            else:
-                # Relative path - resolve from the directory containing the markdown file
-                resolved_path = base_path.parent / clean_url
-
-            # Normalize the path to handle .. and . components
-            resolved_path = resolved_path.resolve()
-
-            # Store the resolved path as string - for tests, use the Path object directly
-            result["resolved_path"] = str(resolved_path)
-            # Also store the path object for reliable comparison across platforms and symlinks
-            result["path_object"] = resolved_path
-
-            if resolved_path.exists():
-                result["is_valid"] = True
-            else:
-                result["error"] = f"File not found: {resolved_path}"
-
+            resolved_path = Path(_native.resolve_local_path(url, str(base_path)))
         except Exception as e:
-            result["error"] = f"Error resolving path: {e}"
+            return {
+                "is_valid": False,
+                "error": f"Error resolving path: {e}",
+                "resolved_path": None,
+            }
 
-        return result
+        if resolved_path.exists():
+            return {
+                "is_valid": True,
+                "error": None,
+                "resolved_path": str(resolved_path),
+                "path_object": resolved_path,
+            }
+        return {
+            "is_valid": False,
+            "error": f"File not found: {resolved_path}",
+            "resolved_path": str(resolved_path),
+            "path_object": resolved_path,
+        }
 
     async def check_url_async(self, url: str) -> dict[str, Any]:
         """Check if a URL is valid and get redirect information asynchronously."""
