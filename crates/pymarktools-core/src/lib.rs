@@ -1,5 +1,6 @@
 //! Type-safe implementation shared by pymarktools entry points.
 
+pub mod discovery;
 pub mod markdown;
 pub mod model;
 pub mod paths;

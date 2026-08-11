@@ -9,4 +9,6 @@ name = "pymarktools_core"
 path = "src/lib.rs"
 
 [dependencies]
+globset = "0.4"
+ignore = "0.4"
 regex = "1.11"
