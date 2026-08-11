@@ -4,6 +4,8 @@
 
 ### Added
 
+- Rust-native Markdown parsing, file discovery, validation, configuration loading, and reference rewriting, packaged
+  as prebuilt Python wheels for Linux, macOS, and Windows.
 - Pre-commit hooks for automated code quality checks (linting, formatting, type checking)
 - Pre-commit configuration with hooks matching CI pipeline checks
 - Justfile with development tasks for quality checks, testing, and building
