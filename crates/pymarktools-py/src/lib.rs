@@ -1,5 +1,6 @@
 //! PyO3 bindings for the pymarktools Rust core.
 
+use pymarktools_core::config::parse_tool_config;
 use pymarktools_core::discovery::discover_markdown_files;
 use pymarktools_core::http::check_email_domain as check_core_email_domain;
 use pymarktools_core::http::check_url as check_core_url;
@@ -271,6 +272,12 @@ fn move_and_rewrite_py(source: &str, destination: &str, base_dir: &str) -> PyRes
     .map_err(pyo3::exceptions::PyOSError::new_err)
 }
 
+#[pyfunction(name = "load_tool_config")]
+fn load_tool_config_py(path: &str) -> PyResult<String> {
+    let content = std::fs::read_to_string(path).map_err(pyo3::exceptions::PyOSError::new_err)?;
+    parse_tool_config(&content).map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -284,5 +291,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(check_url_py, module)?)?;
     module.add_function(wrap_pyfunction!(check_email_domain_py, module)?)?;
     module.add_function(wrap_pyfunction!(relative_reference_py, module)?)?;
-    module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)
+    module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)?;
+    module.add_function(wrap_pyfunction!(load_tool_config_py, module)?)
 }

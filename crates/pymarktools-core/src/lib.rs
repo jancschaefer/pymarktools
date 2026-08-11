@@ -1,5 +1,6 @@
 //! Type-safe implementation shared by pymarktools entry points.
 
+pub mod config;
 pub mod discovery;
 pub mod http;
 pub mod markdown;

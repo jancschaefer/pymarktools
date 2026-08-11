@@ -1,5 +1,6 @@
 """Public Python API compatibility contracts."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -91,6 +92,16 @@ def test_native_move_updates_markdown_references(tmp_path: Path) -> None:
 
     assert (tmp_path / "assets" / "logo.svg").is_file()
     assert (tmp_path / "README.md").read_text(encoding="utf-8") == "![logo](assets/logo.svg)\n"
+
+
+def test_native_load_tool_config(tmp_path: Path) -> None:
+    """Rust extracts the pymarktools TOML table as JSON."""
+    import pymarktools._native as native
+
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text("[tool.pymarktools]\ntimeout = 12\n", encoding="utf-8")
+
+    assert json.loads(native.load_tool_config(str(pyproject))) == {"timeout": 12}
 
 
 def test_link_and_image_result_shapes_stay_stable() -> None:

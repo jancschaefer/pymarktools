@@ -3,10 +3,12 @@
 This module handles loading configuration from pyproject.toml files.
 """
 
+import json
 import logging
-import tomllib
 from pathlib import Path
 from typing import Any
+
+from pymarktools import _native
 
 from .check_options import CheckOptions
 
@@ -61,14 +63,9 @@ def load_pyproject_config(pyproject_path: Path | None = None) -> dict[str, Any]:
         return {}
 
     try:
-        with open(pyproject_path, "rb") as f:
-            data = tomllib.load(f)
+        return json.loads(_native.load_tool_config(str(pyproject_path)))
 
-        # Get the tool.pymarktools section
-        tool_config = data.get("tool", {})
-        return tool_config.get("pymarktools", {})
-
-    except (tomllib.TOMLDecodeError, OSError) as e:
+    except (OSError, ValueError, json.JSONDecodeError) as e:
         # If there's an error reading the file, return empty config
         logger.warning(f"Could not read {pyproject_path}: {e}")
         return {}
