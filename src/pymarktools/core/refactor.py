@@ -3,10 +3,11 @@
 import fnmatch
 import logging
 import re
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from re import Pattern
+
+from pymarktools import _native
 
 logger = logging.getLogger(__name__)
 
@@ -204,14 +205,7 @@ class FileReferenceManager:
         references : list[FileReference]
             List of references to update.
         """
-        # Create destination directory if it doesn't exist
-        destination.parent.mkdir(parents=True, exist_ok=True)
-
-        # Move the file
-        shutil.move(str(source), str(destination))
-
-        # Update all references
-        self._update_references(references, source, destination)
+        _native.move_and_rewrite(str(source), str(destination), str(self.base_dir))
 
     def _update_references(self, references: list[FileReference], old_path: Path, new_path: Path) -> None:
         """Update all references in their respective files."""

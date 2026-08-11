@@ -79,6 +79,20 @@ def test_native_relative_reference_uses_forward_slashes() -> None:
     assert native.relative_reference("docs/guides", "assets/logo.svg") == "../../assets/logo.svg"
 
 
+def test_native_move_updates_markdown_references(tmp_path: Path) -> None:
+    """The native refactor operation moves a file and rewrites its references."""
+    import pymarktools._native as native
+
+    (tmp_path / "images").mkdir()
+    (tmp_path / "images" / "logo.svg").write_text("svg", encoding="utf-8")
+    (tmp_path / "README.md").write_text("![logo](images/logo.svg)\n", encoding="utf-8")
+
+    native.move_and_rewrite(str(tmp_path / "images" / "logo.svg"), str(tmp_path / "assets" / "logo.svg"), str(tmp_path))
+
+    assert (tmp_path / "assets" / "logo.svg").is_file()
+    assert (tmp_path / "README.md").read_text(encoding="utf-8") == "![logo](assets/logo.svg)\n"
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]

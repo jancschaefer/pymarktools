@@ -7,6 +7,7 @@ use pymarktools_core::markdown::{
 };
 use pymarktools_core::model::{ImageInfo, LinkInfo};
 use pymarktools_core::paths::resolve_local_path as resolve_core_local_path;
+use pymarktools_core::refactor::move_and_rewrite as move_core_and_rewrite;
 use pymarktools_core::refactor::relative_reference as relative_core_reference;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
@@ -246,6 +247,16 @@ fn relative_reference_py(from_dir: &str, to_file: &str) -> String {
     )
 }
 
+#[pyfunction(name = "move_and_rewrite")]
+fn move_and_rewrite_py(source: &str, destination: &str, base_dir: &str) -> PyResult<()> {
+    move_core_and_rewrite(
+        std::path::Path::new(source),
+        std::path::Path::new(destination),
+        std::path::Path::new(base_dir),
+    )
+    .map_err(pyo3::exceptions::PyOSError::new_err)
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -257,5 +268,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)?;
     module.add_function(wrap_pyfunction!(discover_files_py, module)?)?;
     module.add_function(wrap_pyfunction!(check_url_py, module)?)?;
-    module.add_function(wrap_pyfunction!(relative_reference_py, module)?)
+    module.add_function(wrap_pyfunction!(relative_reference_py, module)?)?;
+    module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)
 }
