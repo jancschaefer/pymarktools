@@ -11,3 +11,11 @@ fn removes_fragment_and_query_before_resolving_relative_paths() {
         PathBuf::from("fixtures/guide.md")
     );
 }
+
+#[test]
+fn preserves_leading_parent_components_for_relative_document_paths() {
+    assert_eq!(
+        resolve_local_path("../outside.md", Path::new("README.md")),
+        PathBuf::from("../outside.md")
+    );
+}

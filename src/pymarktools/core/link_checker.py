@@ -1,5 +1,6 @@
 """Dead link checker for markdown files."""
 
+import asyncio
 import logging
 from collections.abc import Callable
 from pathlib import Path
@@ -76,7 +77,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
                 "is_permanent_redirect": False,
             }
 
-        return cast(dict[str, Any], _native.check_email_domain(domain, self.timeout))
+        return cast(dict[str, Any], await asyncio.to_thread(_native.check_email_domain, domain, self.timeout))
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
@@ -119,7 +120,7 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
         if self.is_email_url(url):
             return await self.check_email_domain_async(url)
 
-        return cast(dict[str, Any], _native.check_url(url, self.timeout))
+        return cast(dict[str, Any], await asyncio.to_thread(_native.check_url, url, self.timeout))
 
     async def check_file_async(self, file_path: Path) -> list[LinkInfo]:
         """Check all links in a single markdown file asynchronously."""

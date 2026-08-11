@@ -72,11 +72,7 @@ pub fn find_references(
                 if target_path.starts_with("http://") || target_path.starts_with("https://") {
                     continue;
                 }
-                let candidate = if target_path.starts_with('/') {
-                    base_dir.join(target_path.trim_start_matches('/'))
-                } else {
-                    file_path.parent().unwrap_or(base_dir).join(&target_path)
-                };
+                let candidate = resolve_reference_target(&target_path, &file_path, base_dir);
                 if candidate
                     .canonicalize()
                     .as_ref()
@@ -102,25 +98,45 @@ pub fn find_references(
 }
 
 /// Move a file and update Markdown links and images that reference it.
-pub fn move_and_rewrite(source: &Path, destination: &Path, base_dir: &Path) -> Result<(), String> {
+pub fn move_and_rewrite(
+    source: &Path,
+    destination: &Path,
+    base_dir: &Path,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+) -> Result<(), String> {
     let source = source.canonicalize().map_err(|error| error.to_string())?;
-    let files = crate::discovery::discover_markdown_files(base_dir, "*.md", None, false)?;
+    let base_dir = base_dir.canonicalize().map_err(|error| error.to_string())?;
+    let destination_parent = destination
+        .parent()
+        .filter(|path| !path.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    fs::create_dir_all(destination_parent).map_err(|error| error.to_string())?;
+    let destination_name = destination
+        .file_name()
+        .ok_or_else(|| "destination must name a file".to_owned())?;
+    let destination = destination_parent
+        .canonicalize()
+        .map_err(|error| error.to_string())?
+        .join(destination_name);
+    let files = crate::discovery::discover_markdown_files(
+        &base_dir,
+        include_pattern,
+        exclude_pattern,
+        false,
+    )?;
     let pattern = Regex::new(r"!?\[[^\]]*\]\(([^)]+)\)").map_err(|error| error.to_string())?;
     let mut changes = Vec::<(PathBuf, String)>::new();
     for file in files {
         let content = fs::read_to_string(&file).map_err(|error| error.to_string())?;
-        let replacement = relative_reference(file.parent().unwrap_or(base_dir), destination);
+        let replacement = relative_reference(file.parent().unwrap_or(&base_dir), &destination);
         let updated = pattern
             .replace_all(&content, |captures: &regex::Captures<'_>| {
                 let target = &captures[1];
                 if target.starts_with("http://") || target.starts_with("https://") {
                     return captures[0].to_owned();
                 }
-                let resolved = file
-                    .parent()
-                    .unwrap_or(base_dir)
-                    .join(target)
-                    .canonicalize();
+                let resolved = resolve_reference_target(target, &file, &base_dir).canonicalize();
                 if resolved.as_ref().is_ok_and(|path| path == &source) {
                     rewrite_reference(&captures[0], target, &replacement)
                 } else {
@@ -132,14 +148,19 @@ pub fn move_and_rewrite(source: &Path, destination: &Path, base_dir: &Path) -> R
             changes.push((file, updated));
         }
     }
-    if let Some(parent) = destination.parent() {
-        fs::create_dir_all(parent).map_err(|error| error.to_string())?;
-    }
     fs::rename(&source, destination).map_err(|error| error.to_string())?;
     for (file, content) in changes {
         fs::write(file, content).map_err(|error| error.to_string())?;
     }
     Ok(())
+}
+
+fn resolve_reference_target(target: &str, source_file: &Path, base_dir: &Path) -> PathBuf {
+    if target.starts_with('/') {
+        base_dir.join(target.trim_start_matches('/'))
+    } else {
+        source_file.parent().unwrap_or(base_dir).join(target)
+    }
 }
 
 fn components(path: &Path) -> Vec<String> {

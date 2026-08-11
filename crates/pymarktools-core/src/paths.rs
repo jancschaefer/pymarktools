@@ -24,7 +24,9 @@ fn normalize_path(path: &Path) -> PathBuf {
         match component {
             Component::CurDir => {}
             Component::ParentDir => {
-                normalized.pop();
+                if !normalized.pop() {
+                    normalized.push("..");
+                }
             }
             _ => normalized.push(component.as_os_str()),
         }

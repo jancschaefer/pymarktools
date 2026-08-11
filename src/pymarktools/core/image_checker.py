@@ -1,5 +1,6 @@
 """Dead image checker for markdown files."""
 
+import asyncio
 import logging
 from collections.abc import Callable
 from pathlib import Path
@@ -77,7 +78,7 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
                 "is_permanent_redirect": False,
             }
 
-        return cast(dict[str, Any], _native.check_url(url, self.timeout))
+        return cast(dict[str, Any], await asyncio.to_thread(_native.check_url, url, self.timeout))
 
     async def check_file_async(self, file_path: Path) -> list[ImageInfo]:
         """Check all images in a single markdown file asynchronously."""

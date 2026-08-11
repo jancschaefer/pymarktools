@@ -100,7 +100,13 @@ def move_file(
         else:
             # Perform the actual move and update
             echo_info("Performing move operation...")
-            manager.move_file_and_update_references(source=source, destination=destination, references=references)
+            manager.move_file_and_update_references(
+                source=source,
+                destination=destination,
+                references=references,
+                include_pattern=include_pattern or "*.md",
+                exclude_pattern=exclude_pattern,
+            )
             echo_success("✅ Move operation completed successfully")
 
     except Exception as e:

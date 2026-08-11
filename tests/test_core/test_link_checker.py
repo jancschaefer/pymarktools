@@ -1,6 +1,8 @@
 """Tests for the link checker module."""
 
+import asyncio
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -76,6 +78,30 @@ Line 3 with [another link](https://test.com)"""
         assert checker.is_external_url("./local/file.md") is False
         assert checker.is_external_url("../other/file.md") is False
         assert checker.is_external_url("file.md") is False
+
+    def test_native_http_checks_keep_parallel_batches_concurrent(self, monkeypatch):
+        """Native blocking HTTP work must not block asyncio's scheduling loop."""
+        from pymarktools.core import link_checker
+
+        def slow_check_url(url: str, timeout: int) -> dict[str, object]:
+            del url, timeout
+            time.sleep(0.2)
+            return {
+                "is_valid": True,
+                "status_code": 200,
+                "error": None,
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
+
+        monkeypatch.setattr(link_checker._native, "check_url", slow_check_url)
+        checker = DeadLinkChecker(parallel=True, workers=2)
+
+        started = time.monotonic()
+        results = asyncio.run(checker.check_urls_async(["https://one.example", "https://two.example"]))
+
+        assert time.monotonic() - started < 0.35
+        assert set(results) == {"https://one.example", "https://two.example"}
 
     def test_check_file(self, temp_markdown_file):
         checker = DeadLinkChecker()

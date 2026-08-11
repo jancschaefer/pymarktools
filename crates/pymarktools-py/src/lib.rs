@@ -304,11 +304,20 @@ fn find_references_py(
 }
 
 #[pyfunction(name = "move_and_rewrite")]
-fn move_and_rewrite_py(source: &str, destination: &str, base_dir: &str) -> PyResult<()> {
+#[pyo3(signature = (source, destination, base_dir, include_pattern="*.md", exclude_pattern=None))]
+fn move_and_rewrite_py(
+    source: &str,
+    destination: &str,
+    base_dir: &str,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+) -> PyResult<()> {
     move_core_and_rewrite(
         std::path::Path::new(source),
         std::path::Path::new(destination),
         std::path::Path::new(base_dir),
+        include_pattern,
+        exclude_pattern,
     )
     .map_err(pyo3::exceptions::PyOSError::new_err)
 }

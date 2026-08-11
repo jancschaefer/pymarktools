@@ -26,6 +26,8 @@ fn moves_a_file_and_updates_markdown_references() {
         &root.join("images/logo.svg"),
         &root.join("assets/logo.svg"),
         &root,
+        "*.md",
+        None,
     )
     .unwrap();
 

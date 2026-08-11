@@ -13,6 +13,7 @@
 
 ### Changed
 
+- Native refactoring now honors `--include` and `--exclude` consistently for both previews and file rewrites.
 - Converted all docstrings to NumPy style and updated documentation linting configuration.
 - Improved `.gitignore` handling by skipping traversal into ignored directories.
 

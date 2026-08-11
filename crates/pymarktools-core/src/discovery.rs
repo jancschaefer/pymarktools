@@ -32,11 +32,11 @@ pub fn discover_markdown_files(
                 .as_ref()
                 .is_none_or(|matcher| !matcher.matched_path_or_any_parents(path, false).is_ignore())
         })
-        .filter(|path| include.is_match(path))
+        .filter(|path| matches_pattern(&include, path, root))
         .filter(|path| {
             exclude
                 .as_ref()
-                .is_none_or(|patterns| !patterns.is_match(path))
+                .is_none_or(|patterns| !matches_pattern(patterns, path, root))
         })
         .collect::<Vec<_>>();
     files.sort();
@@ -66,4 +66,12 @@ fn compile_glob(pattern: &str) -> Result<GlobSet, String> {
     let mut builder = GlobSetBuilder::new();
     builder.add(Glob::new(pattern).map_err(|error| error.to_string())?);
     builder.build().map_err(|error| error.to_string())
+}
+
+fn matches_pattern(patterns: &GlobSet, path: &Path, root: &Path) -> bool {
+    patterns.is_match(path)
+        || path.file_name().is_some_and(|name| patterns.is_match(name))
+        || path
+            .strip_prefix(root)
+            .is_ok_and(|relative| patterns.is_match(relative))
 }

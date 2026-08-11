@@ -88,10 +88,18 @@ class FileReferenceManager:
         source: Path,
         destination: Path,
         references: list[FileReference],
+        include_pattern: str = "*.md",
+        exclude_pattern: str | None = None,
     ) -> None:
         """Move ``source`` and rewrite Markdown references through Rust."""
         del references
-        _native.move_and_rewrite(str(source), str(destination), str(self.base_dir))
+        _native.move_and_rewrite(
+            str(source),
+            str(destination),
+            str(self.base_dir),
+            include_pattern,
+            exclude_pattern,
+        )
 
     def _update_file_content(
         self,
