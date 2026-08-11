@@ -77,6 +77,8 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
         try:
             domain = self.extract_email_domain(email_url)
 
+            return cast(dict[str, Any], _native.check_email_domain(domain, self.timeout))
+
             # Try to validate domain existence by making a simple HTTP request
             # This is a basic check - we're just verifying the domain resolves
             domain_url = f"https://{domain}"

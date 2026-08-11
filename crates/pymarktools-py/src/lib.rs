@@ -1,6 +1,7 @@
 //! PyO3 bindings for the pymarktools Rust core.
 
 use pymarktools_core::discovery::discover_markdown_files;
+use pymarktools_core::http::check_email_domain as check_core_email_domain;
 use pymarktools_core::http::check_url as check_core_url;
 use pymarktools_core::markdown::{
     extract_images as extract_core_images, extract_links as extract_core_links,
@@ -230,6 +231,19 @@ fn discover_files_py(
 #[pyfunction(name = "check_url")]
 fn check_url_py(py: Python<'_>, url: &str, timeout: u64) -> PyResult<Py<PyDict>> {
     let result = py.allow_threads(|| check_core_url(url, timeout));
+    http_result_to_dict(py, result)
+}
+
+#[pyfunction(name = "check_email_domain")]
+fn check_email_domain_py(py: Python<'_>, domain: &str, timeout: u64) -> PyResult<Py<PyDict>> {
+    let result = py.allow_threads(|| check_core_email_domain(domain, timeout));
+    http_result_to_dict(py, result)
+}
+
+fn http_result_to_dict(
+    py: Python<'_>,
+    result: pymarktools_core::http::HttpResult,
+) -> PyResult<Py<PyDict>> {
     let values = PyDict::new(py);
     values.set_item("is_valid", result.is_valid)?;
     values.set_item("status_code", result.status_code)?;
@@ -268,6 +282,7 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)?;
     module.add_function(wrap_pyfunction!(discover_files_py, module)?)?;
     module.add_function(wrap_pyfunction!(check_url_py, module)?)?;
+    module.add_function(wrap_pyfunction!(check_email_domain_py, module)?)?;
     module.add_function(wrap_pyfunction!(relative_reference_py, module)?)?;
     module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)
 }

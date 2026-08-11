@@ -51,6 +51,22 @@ pub fn check_url(url: &str, timeout_seconds: u64) -> HttpResult {
     }
 }
 
+/// Create the HTTPS endpoint used for email-domain validation.
+#[must_use]
+pub fn email_domain_url(domain: &str) -> String {
+    format!("https://{domain}")
+}
+
+/// Validate an email domain; any HTTP response proves that it resolves.
+#[must_use]
+pub fn check_email_domain(domain: &str, timeout_seconds: u64) -> HttpResult {
+    let mut result = check_url(&email_domain_url(domain), timeout_seconds);
+    if result.status_code.is_some() {
+        result.is_valid = true;
+    }
+    result
+}
+
 fn failed(error: String) -> HttpResult {
     HttpResult {
         is_valid: false,
