@@ -11,6 +11,13 @@ from pymarktools.core.models import ImageInfo, LinkInfo
 pytestmark = pytest.mark.contract
 
 
+def test_native_extension_exposes_the_core_version() -> None:
+    """The Python package exposes its compiled native core."""
+    import pymarktools._native as native
+
+    assert native.core_version().count(".") == 2
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]
