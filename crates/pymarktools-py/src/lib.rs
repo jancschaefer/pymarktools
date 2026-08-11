@@ -9,8 +9,10 @@ use pymarktools_core::markdown::{
 };
 use pymarktools_core::model::{ImageInfo, LinkInfo};
 use pymarktools_core::paths::resolve_local_path as resolve_core_local_path;
+use pymarktools_core::refactor::find_references as find_core_references;
 use pymarktools_core::refactor::move_and_rewrite as move_core_and_rewrite;
 use pymarktools_core::refactor::relative_reference as relative_core_reference;
+use pymarktools_core::refactor::rewrite_reference as rewrite_core_reference;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -262,6 +264,45 @@ fn relative_reference_py(from_dir: &str, to_file: &str) -> String {
     )
 }
 
+#[pyfunction(name = "rewrite_reference")]
+fn rewrite_reference_py(reference: &str, old_target: &str, new_target: &str) -> String {
+    rewrite_core_reference(reference, old_target, new_target)
+}
+
+#[pyfunction(name = "find_references")]
+#[pyo3(signature = (target_file, base_dir, include_pattern="*.md", exclude_pattern=None))]
+fn find_references_py(
+    py: Python<'_>,
+    target_file: &str,
+    base_dir: &str,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+) -> PyResult<Vec<Py<PyDict>>> {
+    let references = py
+        .allow_threads(|| {
+            find_core_references(
+                std::path::Path::new(target_file),
+                std::path::Path::new(base_dir),
+                include_pattern,
+                exclude_pattern,
+            )
+        })
+        .map_err(pyo3::exceptions::PyValueError::new_err)?;
+
+    references
+        .into_iter()
+        .map(|reference| {
+            let values = PyDict::new(py);
+            values.set_item("file_path", reference.file_path.to_string_lossy())?;
+            values.set_item("line_number", reference.line_number)?;
+            values.set_item("reference_text", reference.reference_text)?;
+            values.set_item("reference_type", reference.reference_type)?;
+            values.set_item("target_path", reference.target_path)?;
+            Ok(values.unbind())
+        })
+        .collect()
+}
+
 #[pyfunction(name = "move_and_rewrite")]
 fn move_and_rewrite_py(source: &str, destination: &str, base_dir: &str) -> PyResult<()> {
     move_core_and_rewrite(
@@ -291,6 +332,8 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(check_url_py, module)?)?;
     module.add_function(wrap_pyfunction!(check_email_domain_py, module)?)?;
     module.add_function(wrap_pyfunction!(relative_reference_py, module)?)?;
+    module.add_function(wrap_pyfunction!(rewrite_reference_py, module)?)?;
+    module.add_function(wrap_pyfunction!(find_references_py, module)?)?;
     module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)?;
     module.add_function(wrap_pyfunction!(load_tool_config_py, module)?)
 }

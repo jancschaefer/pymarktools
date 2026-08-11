@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::{fs, process};
 
+use pymarktools_core::refactor::find_references;
 use pymarktools_core::refactor::move_and_rewrite;
 use pymarktools_core::refactor::relative_reference;
 use pymarktools_core::refactor::rewrite_reference;
@@ -46,4 +47,21 @@ fn rewrites_the_target_of_a_markdown_image_without_changing_alt_text() {
         ),
         "![logo](assets/logo.svg)"
     );
+}
+
+#[test]
+fn finds_markdown_references_to_a_target_file() {
+    let root = std::env::temp_dir().join(format!("pymarktools-references-{}", process::id()));
+    let _ = fs::remove_dir_all(&root);
+    fs::create_dir_all(root.join("docs")).unwrap();
+    fs::write(root.join("docs/target.md"), "target").unwrap();
+    fs::write(root.join("README.md"), "[target](docs/target.md)\n").unwrap();
+
+    let references = find_references(&root.join("docs/target.md"), &root, "*.md", None).unwrap();
+
+    assert_eq!(references.len(), 1);
+    assert_eq!(references[0].reference_type, "link");
+    assert_eq!(references[0].target_path, "docs/target.md");
+    assert_eq!(references[0].line_number, 1);
+    fs::remove_dir_all(root).unwrap();
 }

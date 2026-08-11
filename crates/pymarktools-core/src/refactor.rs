@@ -5,6 +5,21 @@ use std::path::{Component, Path, PathBuf};
 
 use regex::Regex;
 
+/// A Markdown reference to a file discovered during refactoring.
+#[derive(Debug, Eq, PartialEq)]
+pub struct FileReference {
+    /// Markdown file containing the reference.
+    pub file_path: PathBuf,
+    /// One-based source line number.
+    pub line_number: usize,
+    /// Complete Markdown reference text.
+    pub reference_text: String,
+    /// Either `link` or `image`.
+    pub reference_type: String,
+    /// The original target text inside the Markdown reference.
+    pub target_path: String,
+}
+
 /// Calculate a forward-slash relative reference from one directory to a file.
 #[must_use]
 pub fn relative_reference(from_dir: &Path, to_file: &Path) -> String {
@@ -28,6 +43,62 @@ pub fn relative_reference(from_dir: &Path, to_file: &Path) -> String {
 #[must_use]
 pub fn rewrite_reference(reference: &str, old_target: &str, new_target: &str) -> String {
     reference.replacen(&format!("({old_target})"), &format!("({new_target})"), 1)
+}
+
+/// Find Markdown links and images that resolve to `target_file`.
+pub fn find_references(
+    target_file: &Path,
+    base_dir: &Path,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+) -> Result<Vec<FileReference>, String> {
+    let target = target_file
+        .canonicalize()
+        .map_err(|error| error.to_string())?;
+    let files = crate::discovery::discover_markdown_files(
+        base_dir,
+        include_pattern,
+        exclude_pattern,
+        false,
+    )?;
+    let pattern = Regex::new(r"(!?)\[[^\]]*\]\(([^)]+)\)").map_err(|error| error.to_string())?;
+    let mut references = Vec::new();
+
+    for file_path in files {
+        let content = fs::read_to_string(&file_path).map_err(|error| error.to_string())?;
+        for (line_index, line) in content.lines().enumerate() {
+            for captures in pattern.captures_iter(line) {
+                let target_path = captures[2].to_owned();
+                if target_path.starts_with("http://") || target_path.starts_with("https://") {
+                    continue;
+                }
+                let candidate = if target_path.starts_with('/') {
+                    base_dir.join(target_path.trim_start_matches('/'))
+                } else {
+                    file_path.parent().unwrap_or(base_dir).join(&target_path)
+                };
+                if candidate
+                    .canonicalize()
+                    .as_ref()
+                    .is_ok_and(|path| path == &target)
+                {
+                    references.push(FileReference {
+                        file_path: file_path.clone(),
+                        line_number: line_index + 1,
+                        reference_text: captures[0].to_owned(),
+                        reference_type: if captures[1].is_empty() {
+                            "link".to_owned()
+                        } else {
+                            "image".to_owned()
+                        },
+                        target_path,
+                    });
+                }
+            }
+        }
+    }
+
+    Ok(references)
 }
 
 /// Move a file and update Markdown links and images that reference it.
