@@ -44,6 +44,18 @@ def test_native_path_resolution_strips_fragments_and_queries() -> None:
     assert native.resolve_local_path("../guide.md#install?unused", "fixtures/docs/README.md") == "fixtures/guide.md"
 
 
+def test_native_discovery_honors_gitignore(tmp_path: Path) -> None:
+    """The Rust extension discovers only non-ignored Markdown files."""
+    import pymarktools._native as native
+
+    (tmp_path / ".gitignore").write_text("generated/\n", encoding="utf-8")
+    (tmp_path / "generated").mkdir()
+    (tmp_path / "generated" / "skip.md").write_text("# skip", encoding="utf-8")
+    (tmp_path / "keep.md").write_text("# keep", encoding="utf-8")
+
+    assert native.discover_files(str(tmp_path)) == [str(tmp_path / "keep.md")]
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]

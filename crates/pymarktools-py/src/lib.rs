@@ -1,5 +1,6 @@
 //! PyO3 bindings for the pymarktools Rust core.
 
+use pymarktools_core::discovery::discover_markdown_files;
 use pymarktools_core::markdown::{
     extract_images as extract_core_images, extract_links as extract_core_links,
 };
@@ -199,6 +200,29 @@ fn resolve_local_path_py(url: &str, document_path: &str) -> String {
         .into_owned()
 }
 
+#[pyfunction(name = "discover_files")]
+#[pyo3(signature = (directory, include_pattern="*.md", exclude_pattern=None, follow_gitignore=true))]
+fn discover_files_py(
+    directory: &str,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+    follow_gitignore: bool,
+) -> PyResult<Vec<String>> {
+    discover_markdown_files(
+        std::path::Path::new(directory),
+        include_pattern,
+        exclude_pattern,
+        follow_gitignore,
+    )
+    .map(|paths| {
+        paths
+            .into_iter()
+            .map(|path| path.to_string_lossy().into_owned())
+            .collect()
+    })
+    .map_err(pyo3::exceptions::PyValueError::new_err)
+}
+
 /// Register pymarktools native bindings.
 #[pymodule]
 fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -207,5 +231,6 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(core_version, module)?)?;
     module.add_function(wrap_pyfunction!(extract_links_py, module)?)?;
     module.add_function(wrap_pyfunction!(extract_images_py, module)?)?;
-    module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)
+    module.add_function(wrap_pyfunction!(resolve_local_path_py, module)?)?;
+    module.add_function(wrap_pyfunction!(discover_files_py, module)?)
 }
