@@ -7,3 +7,6 @@ rust-version = "1.85"
 [lib]
 name = "pymarktools_core"
 path = "src/lib.rs"
+
+[dependencies]
+regex = "1.11"

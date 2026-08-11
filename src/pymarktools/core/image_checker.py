@@ -1,12 +1,13 @@
 """Dead image checker for markdown files."""
 
 import logging
-import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
 import httpx
+
+from pymarktools import _native
 
 from .async_checker import AsyncChecker
 from .models import ImageInfo
@@ -36,19 +37,9 @@ class DeadImageChecker(AsyncChecker[ImageInfo]):
             parallel=parallel,
             workers=workers,
         )
-        self.image_pattern = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
-
     def extract_images(self, content: str) -> list[ImageInfo]:
         """Extract all images from markdown content."""
-        images: list[ImageInfo] = []
-        lines: list[str] = content.split("\n")
-
-        for line_num, line in enumerate(lines, 1):
-            matches = self.image_pattern.findall(line)
-            for alt_text, url in matches:
-                images.append(ImageInfo(alt_text=alt_text, url=url, line_number=line_num))
-
-        return images
+        return cast(list[ImageInfo], _native.extract_images(content))
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""

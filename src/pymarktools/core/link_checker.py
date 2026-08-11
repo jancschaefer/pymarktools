@@ -1,12 +1,13 @@
 """Dead link checker for markdown files."""
 
 import logging
-import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
 import httpx
+
+from pymarktools import _native
 
 from .async_checker import AsyncChecker
 from .models import LinkInfo
@@ -36,26 +37,9 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             parallel=parallel,
             workers=workers,
         )
-        self.link_pattern = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
-
     def extract_links(self, content: str) -> list[LinkInfo]:
         """Extract all links from markdown content, excluding images."""
-        links: list[LinkInfo] = []
-        lines: list[str] = content.split("\n")
-
-        for line_num, line in enumerate(lines, 1):
-            # Find all potential matches
-            matches = self.link_pattern.findall(line)
-            for text, url in matches:
-                # Find the position of this match in the line to check if it's preceded by !
-                pattern_text: str = f"[{text}]({url})"
-                pos: int = line.find(pattern_text)
-
-                # Check if this is not an image (not preceded by !)
-                if pos == 0 or line[pos - 1] != "!":
-                    links.append(LinkInfo(text=text, url=url, line_number=line_num))
-
-        return links
+        return cast(list[LinkInfo], _native.extract_links(content))
 
     def is_email_url(self, url: str) -> bool:
         """Check if URL is an email (mailto:) link."""

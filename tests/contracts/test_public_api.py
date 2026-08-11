@@ -18,6 +18,25 @@ def test_native_extension_exposes_the_core_version() -> None:
     assert native.core_version().count(".") == 2
 
 
+def test_native_parser_returns_mutable_result_objects() -> None:
+    """Native parsing preserves the result-object interface used by checkers."""
+    import pymarktools._native as native
+
+    result = native.extract_links("[docs](guide.md)")[0]
+    result.is_valid = True
+
+    assert (result.text, result.url, result.line_number, result.is_valid) == ("docs", "guide.md", 1, True)
+
+
+def test_python_checkers_expose_native_result_objects() -> None:
+    """The existing checker API returns results backed by the Rust extension."""
+    import pymarktools._native as native
+
+    result = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]
+
+    assert isinstance(result, native.LinkInfo)
+
+
 def test_link_and_image_result_shapes_stay_stable() -> None:
     """Extraction exposes the current result types and primary fields."""
     link = DeadLinkChecker(check_external=False).extract_links("[docs](guide.md)")[0]
