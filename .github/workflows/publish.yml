@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: PyO3/maturin-action@v1
         env:
-          CFLAGS_aarch64_unknown_linux_gnu: ${{ matrix.target == 'aarch64' && '-march=armv8-a' || '' }}
+          CFLAGS_aarch64_unknown_linux_gnu: ${{ matrix.target == 'aarch64' && '-march=armv8-a -D__ARM_ARCH=8' || '' }}
         with:
           target: ${{ matrix.target }}
           args: --release --out dist
