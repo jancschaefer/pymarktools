@@ -2,6 +2,8 @@
 
 ## [unreleased]
 
+## [0.4.0] - 2026-08-12
+
 ### Added
 
 - Rust-native Markdown parsing, file discovery, validation, configuration loading, and reference rewriting, packaged
