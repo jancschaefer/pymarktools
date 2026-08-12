@@ -1,14 +1,13 @@
 """Base async checker class for pymarktools."""
 
 import asyncio
-import fnmatch
 import logging
 import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar
 
-from .gitignore import get_gitignore_matcher, is_path_ignored
+from pymarktools import _native
 
 logger = logging.getLogger(__name__)
 
@@ -51,83 +50,15 @@ class AsyncChecker[T]:
         exclude_pattern: str | None = None,
     ) -> list[Path]:
         """Discover files asynchronously with first-level directory listing and parallel expansion."""
-        if not directory.is_dir():
-            return [directory] if directory.is_file() else []
-
-        # Get gitignore matcher if needed
-        gitignore_matcher: Callable[[str], bool] | None = None
-        if self.follow_gitignore:
-            gitignore_matcher = get_gitignore_matcher(directory)
-
-        async def check_and_add_file(file_path: Path) -> Path | None:
-            """Check if a file should be included."""
-            if not file_path.is_file():
-                return None
-
-            # Check exclude pattern
-            if exclude_pattern:
-                relative_path = file_path.relative_to(directory)
-                if fnmatch.fnmatch(str(relative_path), exclude_pattern) or fnmatch.fnmatch(
-                    file_path.name, exclude_pattern
-                ):
-                    return None
-
-            # Check gitignore
-            if self.follow_gitignore and gitignore_matcher:
-                if is_path_ignored(file_path, gitignore_matcher):
-                    return None
-
-            # Check include pattern
-            if fnmatch.fnmatch(file_path.name, include_pattern):
-                return file_path
-            return None
-
-        async def process_directory_level(dir_path: Path) -> list[Path]:
-            """Process a single directory level and return matching files."""
-            try:
-                # Skip processing if the directory itself is ignored
-                if self.follow_gitignore and gitignore_matcher and is_path_ignored(dir_path, gitignore_matcher):
-                    return []
-
-                files: list[Path] = []
-                subdirs: list[Path] = []
-
-                # Separate files and directories
-                for item in dir_path.iterdir():
-                    if item.is_file():
-                        files.append(item)
-                    elif item.is_dir():
-                        if self.follow_gitignore and gitignore_matcher and is_path_ignored(item, gitignore_matcher):
-                            continue
-                        subdirs.append(item)
-
-                # Process files in current directory
-                file_tasks: list[asyncio.Task[Path | None]] = [
-                    asyncio.create_task(check_and_add_file(file_path)) for file_path in files
-                ]
-                file_results: list[Path | None | BaseException] = await asyncio.gather(
-                    *file_tasks, return_exceptions=True
-                )
-
-                valid_files = [f for f in file_results if isinstance(f, Path)]
-
-                # Process subdirectories recursively
-                if subdirs:
-                    subdir_tasks = [process_directory_level(subdir) for subdir in subdirs]
-                    subdir_results = await asyncio.gather(*subdir_tasks, return_exceptions=True)
-
-                    for result in subdir_results:
-                        if isinstance(result, list):
-                            valid_files.extend(result)
-
-                return valid_files
-
-            except (PermissionError, OSError) as e:
-                logger.debug(f"Cannot access directory {dir_path}: {e}")
-                return []
-
-        # Start the async file discovery
-        return await process_directory_level(directory)
+        return [
+            Path(path)
+            for path in _native.discover_files(
+                str(directory),
+                include_pattern,
+                exclude_pattern,
+                self.follow_gitignore,
+            )
+        ]
 
     def run_async_with_fallback(self: "AsyncChecker", coro_func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Run an async function with fallback to thread pool if already in event loop."""

@@ -1,0 +1,13 @@
+[package]
+name = "pymarktools-py"
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.85"
+
+[lib]
+name = "_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+pymarktools-core = { path = "../pymarktools-core" }
+pyo3 = { version = "0.24", features = ["abi3-py312", "extension-module"] }

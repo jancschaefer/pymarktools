@@ -1,12 +1,12 @@
 """Dead link checker for markdown files."""
 
+import asyncio
 import logging
-import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, cast
 
-import httpx
+from pymarktools import _native
 
 from .async_checker import AsyncChecker
 from .models import LinkInfo
@@ -36,26 +36,10 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
             parallel=parallel,
             workers=workers,
         )
-        self.link_pattern = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
     def extract_links(self, content: str) -> list[LinkInfo]:
         """Extract all links from markdown content, excluding images."""
-        links: list[LinkInfo] = []
-        lines: list[str] = content.split("\n")
-
-        for line_num, line in enumerate(lines, 1):
-            # Find all potential matches
-            matches = self.link_pattern.findall(line)
-            for text, url in matches:
-                # Find the position of this match in the line to check if it's preceded by !
-                pattern_text: str = f"[{text}]({url})"
-                pos: int = line.find(pattern_text)
-
-                # Check if this is not an image (not preceded by !)
-                if pos == 0 or line[pos - 1] != "!":
-                    links.append(LinkInfo(text=text, url=url, line_number=line_num))
-
-        return links
+        return _native.extract_links(content)
 
     def is_email_url(self, url: str) -> bool:
         """Check if URL is an email (mailto:) link."""
@@ -82,127 +66,61 @@ class DeadLinkChecker(AsyncChecker[LinkInfo]):
 
     async def check_email_domain_async(self, email_url: str) -> dict[str, Any]:
         """Check if an email domain exists by validating the domain via HTTP."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "status_code": None,
-            "error": None,
-            "redirect_url": None,
-            "is_permanent_redirect": False,
-        }
-
         try:
             domain = self.extract_email_domain(email_url)
-
-            # Try to validate domain existence by making a simple HTTP request
-            # This is a basic check - we're just verifying the domain resolves
-            domain_url = f"https://{domain}"
-
-            # verify=False allows tests to run in environments without valid TLS
-            # certificates. Consider enabling verification in production.
-            async with httpx.AsyncClient(
-                timeout=self.timeout,
-                follow_redirects=False,
-                verify=False,
-            ) as client:
-                response: httpx.Response = await client.head(domain_url)
-                result["status_code"] = response.status_code
-
-                # For email domains, we consider any response (even 4xx/5xx) as valid
-                # since we're just checking if the domain exists, not if it serves a website
-                result["is_valid"] = True
-
         except ValueError as e:
-            result["error"] = f"Invalid email format: {e}"
-        except httpx.RequestError as e:
-            # Network errors might indicate domain doesn't exist
-            result["error"] = f"Domain validation failed: {e}"
-        except Exception as e:
-            result["error"] = f"Email domain check failed: {e}"
+            return {
+                "is_valid": False,
+                "status_code": None,
+                "error": f"Invalid email format: {e}",
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
 
-        return result
+        return cast(dict[str, Any], await asyncio.to_thread(_native.check_email_domain, domain, self.timeout))
 
     def check_local_path(self, url: str, base_path: Path) -> dict[str, Any]:
         """Check if a local file path exists relative to the base path."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "error": None,
-            "resolved_path": None,
-        }
-
         try:
-            # Handle different types of local links
-            clean_url: str = url.split("#")[0].split("?")[0]  # Remove anchors and query params
-
-            if clean_url.startswith("/"):
-                # Absolute path - resolve from base_path parent directory
-                # This assumes the markdown file is in a subdirectory of the project
-                resolved_path: Path = base_path.parent / clean_url.lstrip("/")
-            else:
-                # Relative path - resolve from the directory containing the markdown file
-                resolved_path = base_path.parent / clean_url
-
-            # Normalize the path to handle .. and . components
-            resolved_path = resolved_path.resolve()
-
-            # Store the resolved path as string - for tests, use the Path object directly
-            result["resolved_path"] = str(resolved_path)
-            # Also store the path object for reliable comparison across platforms and symlinks
-            result["path_object"] = resolved_path
-
-            if resolved_path.exists():
-                result["is_valid"] = True
-            else:
-                result["error"] = f"File not found: {resolved_path}"
-
+            resolved_path = Path(_native.resolve_local_path(url, str(base_path)))
         except Exception as e:
-            result["error"] = f"Error resolving path: {e}"
+            return {
+                "is_valid": False,
+                "error": f"Error resolving path: {e}",
+                "resolved_path": None,
+            }
 
-        return result
+        if resolved_path.exists():
+            return {
+                "is_valid": True,
+                "error": None,
+                "resolved_path": str(resolved_path),
+                "path_object": resolved_path,
+            }
+        return {
+            "is_valid": False,
+            "error": f"File not found: {resolved_path}",
+            "resolved_path": str(resolved_path),
+            "path_object": resolved_path,
+        }
 
     async def check_url_async(self, url: str) -> dict[str, Any]:
         """Check if a URL is valid and get redirect information asynchronously."""
-        result: dict[str, Any] = {
-            "is_valid": False,
-            "status_code": None,
-            "error": None,
-            "redirect_url": None,
-            "is_permanent_redirect": False,
-        }
-
         if not self.is_external_url(url):
             # Local file reference, don't check with HTTP
-            result["is_valid"] = True
-            return result
+            return {
+                "is_valid": True,
+                "status_code": None,
+                "error": None,
+                "redirect_url": None,
+                "is_permanent_redirect": False,
+            }
 
         # Handle email URLs specially
         if self.is_email_url(url):
             return await self.check_email_domain_async(url)
 
-        try:
-            # verify=False allows tests to run in environments without valid TLS
-            # certificates. Consider enabling verification in production.
-            async with httpx.AsyncClient(
-                timeout=self.timeout,
-                follow_redirects=False,
-                verify=False,
-            ) as client:
-                response: httpx.Response = await client.head(url)
-                result["status_code"] = response.status_code
-
-                # Check for redirects (301 permanent, 302 temporary)
-                if response.status_code in (301, 307, 308):  # Permanent redirects
-                    result["is_permanent_redirect"] = True
-                    result["redirect_url"] = response.headers.get("location")
-                elif response.status_code == 302:  # Temporary redirect
-                    result["redirect_url"] = response.headers.get("location")
-
-                # Consider anything in 2xx range as valid
-                result["is_valid"] = 200 <= response.status_code < 300 or response.status_code in (301, 302, 307, 308)
-
-        except httpx.RequestError as e:
-            result["error"] = str(e)
-
-        return result
+        return cast(dict[str, Any], await asyncio.to_thread(_native.check_url, url, self.timeout))
 
     async def check_file_async(self, file_path: Path) -> list[LinkInfo]:
         """Check all links in a single markdown file asynchronously."""

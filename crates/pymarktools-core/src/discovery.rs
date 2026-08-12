@@ -1,0 +1,77 @@
+//! Gitignore-aware Markdown file discovery.
+
+use std::path::{Path, PathBuf};
+
+use globset::{Glob, GlobSet, GlobSetBuilder};
+use ignore::WalkBuilder;
+use ignore::gitignore::GitignoreBuilder;
+
+/// Discover files beneath `root` matching the include and optional exclude patterns.
+pub fn discover_markdown_files(
+    root: &Path,
+    include_pattern: &str,
+    exclude_pattern: Option<&str>,
+    follow_gitignore: bool,
+) -> Result<Vec<PathBuf>, String> {
+    let include = compile_glob(include_pattern)?;
+    let exclude = exclude_pattern.map(compile_glob).transpose()?;
+    let root_gitignore = build_root_gitignore(root, follow_gitignore)?;
+    let mut builder = WalkBuilder::new(root);
+    builder
+        .git_ignore(follow_gitignore)
+        .git_global(false)
+        .git_exclude(false);
+
+    let mut files = builder
+        .build()
+        .filter_map(Result::ok)
+        .map(|entry| entry.into_path())
+        .filter(|path| path.is_file())
+        .filter(|path| {
+            root_gitignore
+                .as_ref()
+                .is_none_or(|matcher| !matcher.matched_path_or_any_parents(path, false).is_ignore())
+        })
+        .filter(|path| matches_pattern(&include, path, root))
+        .filter(|path| {
+            exclude
+                .as_ref()
+                .is_none_or(|patterns| !matches_pattern(patterns, path, root))
+        })
+        .collect::<Vec<_>>();
+    files.sort();
+    Ok(files)
+}
+
+fn build_root_gitignore(
+    root: &Path,
+    follow_gitignore: bool,
+) -> Result<Option<ignore::gitignore::Gitignore>, String> {
+    if !follow_gitignore {
+        return Ok(None);
+    }
+
+    let Some((base, gitignore_path)) = root.ancestors().find_map(|ancestor| {
+        let candidate = ancestor.join(".gitignore");
+        candidate.is_file().then_some((ancestor, candidate))
+    }) else {
+        return Ok(None);
+    };
+    let mut builder = GitignoreBuilder::new(base);
+    builder.add(gitignore_path);
+    builder.build().map(Some).map_err(|error| error.to_string())
+}
+
+fn compile_glob(pattern: &str) -> Result<GlobSet, String> {
+    let mut builder = GlobSetBuilder::new();
+    builder.add(Glob::new(pattern).map_err(|error| error.to_string())?);
+    builder.build().map_err(|error| error.to_string())
+}
+
+fn matches_pattern(patterns: &GlobSet, path: &Path, root: &Path) -> bool {
+    patterns.is_match(path)
+        || path.file_name().is_some_and(|name| patterns.is_match(name))
+        || path
+            .strip_prefix(root)
+            .is_ok_and(|relative| patterns.is_match(relative))
+}

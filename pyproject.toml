@@ -20,8 +20,6 @@ classifiers = [
 ]
 
 dependencies = [
-    "gitignore-parser>=0.1.12",
-    "httpx>=0.28.1",
     "typer>=0.16.0",
 ]
 scripts = { pymarktools = "pymarktools.cli:app", pymd = "pymarktools.cli:app" }
@@ -53,6 +51,7 @@ pythonpath = [
     "src",
 ]
 markers = [
+    "contract: verifies the supported Python and CLI compatibility surface",
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "unit: marks tests as unit tests",
     "integration: marks tests as integration tests",
@@ -60,8 +59,14 @@ markers = [
 
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+manifest-path = "crates/pymarktools-py/Cargo.toml"
+module-name = "pymarktools._native"
+python-source = "src"
+bindings = "pyo3"
 
 [dependency-groups]
 dev = [
@@ -73,6 +78,7 @@ dev = [
     "mdformat-tables>=1.0.0",
     "mdformat-toc>=0.3.0",
     "mypy>=1.16.1",
+    "maturin>=1.8,<2.0",
     "pre-commit>=4.0.0",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",

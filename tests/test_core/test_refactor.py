@@ -73,6 +73,32 @@ class TestFileReferenceManager:
         references = manager.find_references(unreferenced)
         assert len(references) == 0
 
+    def test_move_rewrites_root_relative_references_within_the_selected_pattern(self, temp_dir):
+        manager = FileReferenceManager(temp_dir)
+        source = temp_dir / "assets" / "logo.svg"
+        source.parent.mkdir()
+        source.write_text("svg")
+        selected = temp_dir / "guide.mdx"
+        selected.write_text("![logo](/assets/logo.svg)\n")
+        excluded = temp_dir / "README.mdx"
+        excluded.write_text("![logo](/assets/logo.svg)\n")
+        destination = temp_dir / "media" / "logo.svg"
+
+        references = manager.find_references(
+            source,
+            include_pattern="*.mdx",
+            exclude_pattern="README.mdx",
+        )
+        manager.move_file_and_update_references(
+            source,
+            destination,
+            references,
+        )
+
+        assert len(references) == 1
+        assert selected.read_text() == "![logo](media/logo.svg)\n"
+        assert excluded.read_text() == "![logo](/assets/logo.svg)\n"
+
     def test_calculate_new_reference_link(self, temp_dir):
         manager = FileReferenceManager(temp_dir)
 
