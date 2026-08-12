@@ -610,7 +610,7 @@ dependencies = [
 
 [[package]]
 name = "pymarktools-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "globset",
  "ignore",
@@ -622,7 +622,7 @@ dependencies = [
 
 [[package]]
 name = "pymarktools-py"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "pymarktools-core",
  "pyo3",
