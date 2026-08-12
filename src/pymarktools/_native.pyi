@@ -78,5 +78,6 @@ def move_and_rewrite(
     base_dir: str,
     include_pattern: str = "*.md",
     exclude_pattern: str | None = None,
+    selected_files: list[str] | None = None,
 ) -> None: ...
 def load_tool_config(path: str) -> str: ...

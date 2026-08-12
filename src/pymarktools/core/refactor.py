@@ -92,13 +92,13 @@ class FileReferenceManager:
         exclude_pattern: str | None = None,
     ) -> None:
         """Move ``source`` and rewrite Markdown references through Rust."""
-        del references
         _native.move_and_rewrite(
             str(source),
             str(destination),
             str(self.base_dir),
             include_pattern,
             exclude_pattern,
+            [str(reference.file_path) for reference in references],
         )
 
     def _update_file_content(

@@ -104,6 +104,7 @@ pub fn move_and_rewrite(
     base_dir: &Path,
     include_pattern: &str,
     exclude_pattern: Option<&str>,
+    selected_files: Option<&[PathBuf]>,
 ) -> Result<(), String> {
     let source = source.canonicalize().map_err(|error| error.to_string())?;
     let base_dir = base_dir.canonicalize().map_err(|error| error.to_string())?;
@@ -119,12 +120,18 @@ pub fn move_and_rewrite(
         .canonicalize()
         .map_err(|error| error.to_string())?
         .join(destination_name);
-    let files = crate::discovery::discover_markdown_files(
-        &base_dir,
-        include_pattern,
-        exclude_pattern,
-        false,
-    )?;
+    let files = match selected_files {
+        Some(files) => files
+            .iter()
+            .map(|path| path.canonicalize().map_err(|error| error.to_string()))
+            .collect::<Result<Vec<_>, _>>()?,
+        None => crate::discovery::discover_markdown_files(
+            &base_dir,
+            include_pattern,
+            exclude_pattern,
+            false,
+        )?,
+    };
     let pattern = Regex::new(r"!?\[[^\]]*\]\(([^)]+)\)").map_err(|error| error.to_string())?;
     let mut changes = Vec::<(PathBuf, String)>::new();
     for file in files {

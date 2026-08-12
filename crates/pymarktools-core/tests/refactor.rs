@@ -28,6 +28,7 @@ fn moves_a_file_and_updates_markdown_references() {
         &root,
         "*.md",
         None,
+        None,
     )
     .unwrap();
 

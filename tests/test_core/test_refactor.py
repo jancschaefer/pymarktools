@@ -93,8 +93,6 @@ class TestFileReferenceManager:
             source,
             destination,
             references,
-            include_pattern="*.mdx",
-            exclude_pattern="README.mdx",
         )
 
         assert len(references) == 1
