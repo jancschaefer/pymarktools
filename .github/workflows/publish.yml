@@ -137,4 +137,5 @@ jobs:
         run: >-
           gh release upload
           '${{ github.ref_name }}' dist/**
+          --clobber
           --repo '${{ github.repository }}'
