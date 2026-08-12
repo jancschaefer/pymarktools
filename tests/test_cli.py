@@ -99,9 +99,18 @@ def test_check_dead_images_help(runner):
 def test_cli_version(runner):
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
+
     from pymarktools import __version__
 
     assert __version__ in result.output
+
+
+def test_package_version_matches_installed_metadata():
+    from importlib.metadata import version
+
+    from pymarktools import __version__
+
+    assert __version__ == version("pymarktools")
 
 
 def test_verbose_flag(runner, temp_valid_markdown_file):

@@ -2,6 +2,13 @@
 
 ## [unreleased]
 
+## [0.4.1] - 2026-08-12
+
+### Fixed
+
+- Public package and CLI version reporting now use the installed distribution metadata.
+- GitHub release distribution uploads now safely replace existing assets when a release workflow is rerun.
+
 ## [0.4.0] - 2026-08-12
 
 ### Added
