@@ -203,9 +203,14 @@ fn extract_images_py(content: &str) -> Vec<PyImageInfo> {
 /// Resolve a local Markdown reference relative to its document path.
 #[pyfunction(name = "resolve_local_path")]
 fn resolve_local_path_py(url: &str, document_path: &str) -> String {
-    resolve_core_local_path(url, std::path::Path::new(document_path))
-        .to_string_lossy()
-        .into_owned()
+    markdown_path(&resolve_core_local_path(
+        url,
+        std::path::Path::new(document_path),
+    ))
+}
+
+fn markdown_path(path: &std::path::Path) -> String {
+    path.to_string_lossy().replace('\\', "/")
 }
 
 #[pyfunction(name = "discover_files")]
@@ -353,4 +358,19 @@ fn _native(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(find_references_py, module)?)?;
     module.add_function(wrap_pyfunction!(move_and_rewrite_py, module)?)?;
     module.add_function(wrap_pyfunction!(load_tool_config_py, module)?)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use super::markdown_path;
+
+    #[test]
+    fn normalizes_windows_separators_for_markdown_paths() {
+        assert_eq!(
+            markdown_path(Path::new(r"fixtures\guide.md")),
+            "fixtures/guide.md"
+        );
+    }
 }
