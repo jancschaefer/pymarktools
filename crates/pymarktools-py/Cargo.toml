@@ -10,4 +10,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pymarktools-core = { path = "../pymarktools-core" }
-pyo3 = { version = "0.24", features = ["abi3-py312", "extension-module"] }
+pyo3 = { version = "0.29", features = ["abi3-py312", "extension-module"] }
