@@ -6,8 +6,8 @@
 ![](https://badgen.net/github/checks/jancschaefer/pymarktools/main)
 
 > [!IMPORTANT]
-> **Automated Release Process:** This document outlines the automated release process for pymarktools.
-> Releases are handled through GitHub Actions with PyPI's trusted publisher (OIDC) authentication for security.
+> **Automated Release Process:** This document outlines the automated release process for pymarktools. Releases are
+> handled through GitHub Actions with PyPI's trusted publisher (OIDC) authentication for security.
 
 This document outlines the release process for the pymarktools package.
 
@@ -19,8 +19,8 @@ authentication. This means no manual API tokens are required - releases are full
 ## Prerequisites
 
 > [!WARNING]
-> **Complete Preparation Required:** Ensure all prerequisites are met before starting the release process.
-> Incomplete preparation can lead to failed releases or rollbacks.
+> **Complete Preparation Required:** Ensure all prerequisites are met before starting the release process. Incomplete
+> preparation can lead to failed releases or rollbacks.
 
 - [ ] All tests are passing on the main branch
 - [ ] Version number has been updated in `pyproject.toml`
@@ -75,8 +75,8 @@ Production releases to PyPI happen when you create a GitHub release.
 ### Step 2: Create and Push a Git Tag
 
 > [!IMPORTANT]
-> **Version Matching Required:** The git tag must exactly match the version in `pyproject.toml` for the
-> automated release to work correctly.
+> **Version Matching Required:** The git tag must exactly match the version in `pyproject.toml` for the automated
+> release to work correctly.
 
 ```bash
 # Create a tag (must match the version in pyproject.toml)
@@ -184,8 +184,8 @@ If a release needs to be rolled back:
 ### Common Issues
 
 > [!TIP]
-> **Prevention is Key:** Most release issues can be prevented by ensuring all prerequisites are met and testing
-> the release process with TestPyPI first.
+> **Prevention is Key:** Most release issues can be prevented by ensuring all prerequisites are met and testing the
+> release process with TestPyPI first.
 
 1. **"Permission denied" on PyPI**
 

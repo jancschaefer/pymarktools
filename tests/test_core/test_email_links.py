@@ -142,8 +142,8 @@ Regular link: [website](https://example.com)
             # Email link should not be checked as local file
             email_link = [link for link in links if link.url.startswith("mailto:")][0]
             assert email_link.is_local is False
-            # Should be valid since external checking is disabled
-            assert email_link.is_valid is True
+            # External checking disabled -> mark as unchecked
+            assert email_link.is_valid is None
 
             # Local file link should be checked as local
             local_link = [link for link in links if not link.url.startswith("mailto:")][0]

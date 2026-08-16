@@ -1,8 +1,8 @@
 # Pre-commit Hooks
 
 > [!IMPORTANT]
-> **Essential for Code Quality:** Pre-commit hooks are essential for maintaining code quality and ensuring
-> your contributions meet the project's standards. They run the same checks as the CI pipeline.
+> **Essential for Code Quality:** Pre-commit hooks are essential for maintaining code quality and ensuring your
+> contributions meet the project's standards. They run the same checks as the CI pipeline.
 
 This project uses [pre-commit](https://pre-commit.com/) to run quality checks before each commit. The hooks ensure that
 code quality standards are maintained and match the checks run in CI.
@@ -99,8 +99,8 @@ These pre-commit hooks align with the CI checks in `.github/workflows/test.yml`:
 ## Bypassing Hooks
 
 > [!CAUTION]
-> **Use with Extreme Care:** Bypassing pre-commit hooks should be used sparingly and only when you're certain
-> the code is correct. This can lead to CI failures if code quality issues are introduced.
+> **Use with Extreme Care:** Bypassing pre-commit hooks should be used sparingly and only when you're certain the code
+> is correct. This can lead to CI failures if code quality issues are introduced.
 
 If you need to bypass pre-commit hooks temporarily:
 
