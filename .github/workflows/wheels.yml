@@ -24,7 +24,7 @@ jobs:
           - os: windows-latest
             target: x86_64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         env:
           CFLAGS_aarch64_unknown_linux_gnu: ${{ matrix.target == 'aarch64' && '-march=armv8-a -D__ARM_ARCH=8' || '' }}
@@ -40,7 +40,7 @@ jobs:
   source:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: PyO3/maturin-action@v1
         with:
           command: sdist
