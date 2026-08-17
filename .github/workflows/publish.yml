@@ -57,13 +57,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           pattern: wheels-*
           path: dist/
           merge-multiple: true
       - name: Download source distribution
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: source-distribution
           path: dist/
@@ -85,7 +85,7 @@ jobs:
       id-token: write
     steps:
       - name: Download all distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -103,7 +103,7 @@ jobs:
       id-token: write
     steps:
       - name: Download all distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -121,7 +121,7 @@ jobs:
       id-token: write
     steps:
       - name: Download all distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
